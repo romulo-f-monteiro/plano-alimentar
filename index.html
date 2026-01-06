@@ -95,6 +95,21 @@
             border: 1px solid #cbd5e1;
             text-align: center;
         }
+
+        /* Estilo visual para indicar que o texto é editável */
+        [contenteditable="true"]:hover {
+            background-color: #f8fafc;
+            cursor: text;
+            text-decoration: underline;
+            text-decoration-style: dashed;
+            text-decoration-color: #cbd5e1;
+        }
+        [contenteditable="true"]:focus {
+            background-color: #ffffff;
+            outline: 2px solid var(--primary-light);
+            text-decoration: none;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
@@ -103,7 +118,10 @@
     <header class="theme-bg text-white shadow-lg no-print transition-colors duration-300">
         <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3 w-full md:w-auto">
-                <i class="fa-solid fa-leaf text-2xl"></i>
+                <!-- Alterado para RFM conforme solicitado -->
+                <div class="flex items-center justify-center w-12 h-12 bg-white/20 rounded-lg border-2 border-white/30 backdrop-blur-sm">
+                    <span class="text-xl font-black tracking-tighter">RFM</span>
+                </div>
                 <div>
                     <h1 class="text-xl font-bold">Plano Alimentar</h1>
                     <p class="text-xs opacity-90">Dietas Personalizadas</p>
@@ -153,7 +171,8 @@
                 
                 <!-- Cor -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                    <h3 class="text-xs font-bold text-slate-500 uppercase mb-3">Personalizar Cor (10 opções)</h3>
+                    <!-- Texto alterado conforme solicitado -->
+                    <h3 class="text-xs font-bold text-slate-500 uppercase mb-3">Personalizar Cor</h3>
                     <div class="grid grid-cols-5 gap-3">
                         <!-- Linha 1 -->
                         <button onclick="setTheme('emerald')" class="w-8 h-8 rounded-full bg-emerald-600 hover:scale-110 transition ring-2 ring-offset-1 ring-transparent focus:ring-slate-300" title="Verde Esmeralda"></button>
@@ -255,13 +274,35 @@
                     
                     <div id="custom-food-form" class="hidden space-y-3 pt-2 border-t border-slate-100">
                         <input type="text" id="new-name" placeholder="Nome do Alimento" class="w-full p-2 text-sm border rounded">
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="number" id="new-cal" placeholder="Kcal" class="w-full p-2 text-sm border rounded">
-                            <input type="number" id="new-carb" placeholder="Carb" class="w-full p-2 text-sm border rounded">
-                            <input type="number" id="new-prot" placeholder="Prot" class="w-full p-2 text-sm border rounded">
-                            <input type="number" id="new-fat" placeholder="Gord" class="w-full p-2 text-sm border rounded">
+                        
+                        <!-- Novo campo de Porção Base -->
+                        <div class="relative">
+                            <label class="text-[10px] text-slate-400 uppercase font-bold ml-1">Porção utilizada nos dados abaixo:</label>
+                            <div class="flex gap-2 mb-2">
+                                <input type="number" id="new-serving" placeholder="Porção (g)" value="100" class="w-1/3 p-2 text-sm border rounded bg-slate-50 text-center font-semibold">
+                                <span class="flex items-center text-xs text-slate-500">gramas (padrão)</span>
+                            </div>
                         </div>
-                        <button onclick="createCustomFood()" class="w-full bg-blue-50 text-blue-600 hover:bg-blue-100 py-2 rounded-lg text-sm font-semibold transition border border-blue-200">
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold ml-1">Calorias</label>
+                                <input type="number" id="new-cal" placeholder="Kcal" class="w-full p-2 text-sm border rounded">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold ml-1">Carbo</label>
+                                <input type="number" id="new-carb" placeholder="Carb (g)" class="w-full p-2 text-sm border rounded">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold ml-1">Proteína</label>
+                                <input type="number" id="new-prot" placeholder="Prot (g)" class="w-full p-2 text-sm border rounded">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-slate-400 font-bold ml-1">Gordura</label>
+                                <input type="number" id="new-fat" placeholder="Gord (g)" class="w-full p-2 text-sm border rounded">
+                            </div>
+                        </div>
+                        <button onclick="createCustomFood()" class="w-full bg-blue-50 text-blue-600 hover:bg-blue-100 py-2 rounded-lg text-sm font-semibold transition border border-blue-200 mt-2">
                             Salvar no Banco
                         </button>
                     </div>
@@ -614,6 +655,29 @@
             }
         }
 
+        function moveMeal(index, direction) {
+            if (direction === -1 && index > 0) {
+                // Swap with previous
+                [dietMeals[index], dietMeals[index - 1]] = [dietMeals[index - 1], dietMeals[index]];
+            } else if (direction === 1 && index < dietMeals.length - 1) {
+                // Swap with next
+                [dietMeals[index], dietMeals[index + 1]] = [dietMeals[index + 1], dietMeals[index]];
+            } else {
+                return; // Can't move
+            }
+            renderDiet();
+            renderMealSelect(); // Sync dropdown
+        }
+
+        function updateMealTitle(id, newName) {
+            const meal = dietMeals.find(m => m.id === id);
+            if(meal) {
+                meal.title = newName.trim();
+                renderMealSelect(); // Sync dropdown
+                showToast("Nome da refeição atualizado", "neutral");
+            }
+        }
+
         function renderMealSelect() {
             const select = document.getElementById('select-meal');
             const currentVal = select.value;
@@ -668,6 +732,16 @@
             renderFoodSelect(searchInput.value);
         }
 
+        // --- FUNÇÃO PARA ATUALIZAR NOME DO ALIMENTO ---
+        function updateFoodName(mealId, foodIndex, newName) {
+            const meal = dietMeals.find(m => m.id === mealId);
+            if (meal && meal.foods[foodIndex]) {
+                // Atualiza o nome apenas na instância local da dieta
+                meal.foods[foodIndex].name = newName.trim();
+                showToast("Nome do alimento atualizado", "neutral");
+            }
+        }
+
         // --- RENDERIZAÇÃO DA DIETA ---
 
         function renderDiet() {
@@ -676,7 +750,7 @@
 
             let dailyTotal = { cal: 0, carb: 0, prot: 0, fat: 0 };
 
-            dietMeals.forEach(meal => {
+            dietMeals.forEach((meal, index) => {
                 let mCal = 0, mCarb = 0, mProt = 0, mFat = 0;
                 meal.foods.forEach(f => {
                     // Totais da refeição (Visual Header) - Soma tudo
@@ -717,7 +791,12 @@
                                             const originalIndex = meal.foods.indexOf(food);
                                             return `
                                             <tr class="hover:bg-slate-50 transition group">
-                                                <td class="p-3 text-slate-700 font-medium pl-4 w-1/2">${food.name}</td>
+                                                <td class="p-3 text-slate-700 font-medium pl-4 w-1/2 transition"
+                                                    contenteditable="true"
+                                                    onblur="updateFoodName(${meal.id}, ${originalIndex}, this.innerText)"
+                                                    onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+                                                    title="Clique para editar o nome"
+                                                >${food.name}</td>
                                                 <td class="p-3 text-center text-slate-600 bg-slate-50/50 text-xs">${food.qty}g</td>
                                                 <td class="p-3 text-center font-bold text-slate-700 text-xs">${food.totalCal.toFixed(0)} kcal</td>
                                                 <td class="p-3 text-center text-slate-400 text-[10px] hidden sm:table-cell">C:${food.totalCarb.toFixed(0)} P:${food.totalProt.toFixed(0)} G:${food.totalFat.toFixed(0)}</td>
@@ -727,7 +806,7 @@
                                                     </button>
                                                 </td>
                                             </tr>
-                                        `}).join('')}
+                                            `}).join('')}
                                     </tbody>
                                 </table>`;
                     }
@@ -743,9 +822,27 @@
                             <i class="fa-solid fa-trash-can"></i>
                         </button>
                         <div class="meal-header theme-bg-light p-4 border-b theme-border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                            <h3 class="font-bold text-slate-700 flex items-center gap-2">
-                                <i class="fa-solid fa-utensils theme-text"></i> ${meal.title}
-                            </h3>
+                            
+                            <div class="flex items-center gap-3 flex-1 w-full sm:w-auto">
+                                <!-- Controles de Ordem -->
+                                <div class="flex flex-col gap-1 no-print">
+                                    <button onclick="moveMeal(${index}, -1)" class="text-[10px] leading-none px-1 py-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-600 ${index === 0 ? 'invisible' : ''}" title="Mover para cima">
+                                        <i class="fa-solid fa-chevron-up"></i>
+                                    </button>
+                                    <button onclick="moveMeal(${index}, 1)" class="text-[10px] leading-none px-1 py-0.5 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-600 ${index === dietMeals.length - 1 ? 'invisible' : ''}" title="Mover para baixo">
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </button>
+                                </div>
+
+                                <h3 class="font-bold text-slate-700 flex items-center gap-2 flex-1 cursor-text hover:bg-white/50 px-2 py-1 rounded border border-transparent hover:border-slate-200 transition"
+                                    contenteditable="true"
+                                    onblur="updateMealTitle(${meal.id}, this.innerText)"
+                                    onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+                                    title="Clique para editar o nome da refeição">
+                                    <i class="fa-solid fa-utensils theme-text text-sm"></i> ${meal.title}
+                                </h3>
+                            </div>
+
                             <div class="flex flex-wrap gap-3 text-xs font-semibold">
                                 <div class="theme-text bg-white px-3 py-1 rounded-full border theme-border shadow-sm">~${mCal.toFixed(0)} kcal</div>
                                 <div class="text-blue-600 bg-blue-50 px-2 py-1 rounded-full border border-blue-100">C: ${mCarb.toFixed(0)}g</div>
@@ -894,27 +991,46 @@
 
         function createCustomFood() {
             const name = document.getElementById('new-name').value;
+            // Novo: Pega a porção base do usuário
+            const serving = parseFloat(document.getElementById('new-serving').value);
             const cal = parseFloat(document.getElementById('new-cal').value);
-            if (!name || isNaN(cal)) { showToast("Preencha os dados!", "error"); return; }
-            const newId = Date.now(); // ID único via timestamp
+
+            // Validações
+            if (!name) { showToast("Preencha o nome!", "error"); return; }
+            if (!serving || serving <= 0) { showToast("A porção deve ser maior que 0!", "error"); return; }
+            if (isNaN(cal)) { showToast("Preencha as calorias!", "error"); return; }
+
+            // Fator de conversão para normalizar para 100g
+            // Ex: Se usuário põe 30g e 24g de prot. 
+            // Fator = 100 / 30 = 3.333
+            // Prot armazenada = 24 * 3.333 = 80g (que é o correto para 100g)
+            const factor = 100 / serving;
+
+            const newId = Date.now(); 
             foodDatabase.push({
                 id: newId,
-                name: name,
-                cal: cal,
-                carb: parseFloat(document.getElementById('new-carb').value) || 0,
-                prot: parseFloat(document.getElementById('new-prot').value) || 0,
-                fat: parseFloat(document.getElementById('new-fat').value) || 0
+                name: name, // Nome puro, o sistema de cálculo se encarrega
+                cal: cal * factor,
+                carb: (parseFloat(document.getElementById('new-carb').value) || 0) * factor,
+                prot: (parseFloat(document.getElementById('new-prot').value) || 0) * factor,
+                fat: (parseFloat(document.getElementById('new-fat').value) || 0) * factor
             });
             
             // Limpa form e busca
             document.getElementById('search-food').value = '';
+            document.getElementById('new-name').value = '';
+            document.getElementById('new-cal').value = '';
+            document.getElementById('new-carb').value = '';
+            document.getElementById('new-prot').value = '';
+            document.getElementById('new-fat').value = '';
+            
             renderFoodSelect();
             
             // Seleciona o novo alimento criado
             document.getElementById('select-food').value = newId;
             
             toggleCustomForm();
-            showToast("Alimento criado!");
+            showToast("Alimento criado com sucesso!");
         }
 
         function toggleCustomForm() {
