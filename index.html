@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- Chart.js para o Gráfico -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         :root {
@@ -51,103 +53,140 @@
             .table-container { overflow-x: auto; }
         }
 
-        /* --- CONFIGURAÇÃO DE IMPRESSÃO (NATIVO) --- */
+        /* --- CONFIGURAÇÃO DE IMPRESSÃO (REFINADA) --- */
         @media print {
-            @page { margin: 10mm; size: auto; }
+            /* Remove cabeçalhos e rodapés padrão do navegador */
+            @page { 
+                margin: 0; 
+                size: auto;
+            }
 
             * {
-                animation: none !important;
-                transition: none !important;
-                transform: none !important;
-                backdrop-filter: none !important;
-                -webkit-backdrop-filter: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
                 box-shadow: none !important;
                 text-shadow: none !important;
-                filter: none !important;
             }
 
             body { 
                 background-color: white; 
-                margin: 0; 
-                padding: 0; 
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
+                /* Aumentado o padding para afastar da beirada da folha */
+                padding: 15mm 15mm 20mm 15mm !important; 
+                margin: 0 !important;
             }
             
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            #toast { display: none !important; }
-            #splash-screen { display: none !important; } /* Garante que a tela inicial não imprima */
+            #toast, #splash-screen { display: none !important; }
 
+            /* Layout Geral */
             .container, #document-area {
                 max-width: 100% !important;
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                overflow: visible !important;
+                display: block !important;
             }
 
+            main.grid { display: block !important; }
+            .lg\:col-span-8 { width: 100% !important; }
+
+            /* Tabela */
             table { width: 100% !important; table-layout: fixed !important; }
-            
-            /* --- ALTERAÇÕES DE LARGURA DE COLUNA --- */
             .col-name { width: 42% !important; }
-            
-            .col-qty { 
-                width: 11% !important; 
-                text-align: center !important; 
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                padding: 0 !important; 
-            } 
-            
-            .col-qty .qty-wrapper {
-                justify-content: center !important;
-                width: 100% !important;
-            }
-            
-            .col-cal { 
-                width: 9% !important; 
-                text-align: center !important; 
-                white-space: nowrap !important; 
-            }
-            
-            .col-macro { 
-                width: 8% !important; 
-                text-align: center !important;
-                white-space: nowrap !important;
-                font-size: 9px !important; 
-            }
-            
+            .col-qty { width: 11% !important; text-align: center !important; } 
+            .col-cal { width: 9% !important; text-align: center !important; }
+            .col-macro { width: 8% !important; text-align: center !important; font-size: 9px !important; }
             .col-actions { display: none !important; width: 0 !important; }
 
-            .card, .break-inside-avoid { 
-                break-inside: avoid; 
-                page-break-inside: avoid; 
+            /* --- CARDS DE REFEIÇÃO (Permite quebra suave) --- */
+            .meal-card { 
+                break-inside: auto !important; /* Permite quebrar se for longo */
+                page-break-inside: auto !important;
                 border: 1px solid #ddd;
+                margin-bottom: 20px !important;
+                display: block !important;
                 box-shadow: none !important;
+                border-radius: 8px !important;
             }
             
-            .qty-input {
-                border: none !important;
-                background: transparent !important;
-                padding: 0 !important;
-                text-align: right !important;
-                width: auto !important;
-                max-width: 40px !important;
-                font-weight: normal !important;
-                margin-right: 2px !important;
-            }
-
             .meal-header {
+                break-after: avoid; 
+                page-break-after: avoid;
                 background-color: #f8fafc !important;
                 border-bottom: 1px solid #e2e8f0 !important;
             }
-            
+
+            tr { break-inside: avoid; } /* Evita quebrar linha de tabela ao meio */
+
             .totals-footer {
+                break-before: avoid; 
+                page-break-before: avoid;
                 background-color: #f1f5f9 !important;
-                border-top: 1px solid #cbd5e1 !important;
-                color: #334155 !important;
-                font-weight: bold !important;
+            }
+
+            /* --- CARDS DE RESUMO (Ingestão/Meta) --- */
+            /* Regra rígida: NÃO QUEBRAR AO MEIO */
+            .summary-card {
+                padding: 15px 20px !important; /* Mais espaçamento para não ficar achatado */
+                background-color: #1e293b !important;
+                color: white !important;
+                border-radius: 12px !important;
+                margin-top: 20px !important;
+                border: 1px solid #334155 !important;
+                
+                /* CRUCIAL PARA NÃO CORTAR */
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                display: block !important;
+            }
+
+            /* Ajustes visuais dentro do card de resumo para ficar bonito na impressão */
+            .summary-card h3 {
+                font-size: 16px !important;
+                margin-bottom: 10px !important;
+                padding-bottom: 8px !important;
+                border-bottom: 1px solid #334155 !important;
+            }
+            .summary-card .grid {
+                display: flex !important;
+                justify-content: space-between !important;
+                gap: 15px !important;
+                padding: 5px !important;
+            }
+            .summary-card .text-3xl { font-size: 20px !important; margin-top: 5px !important; }
+            .summary-card .text-2xl { font-size: 18px !important; margin-top: 5px !important; }
+            .summary-card .text-xs { font-size: 10px !important; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.8; }
+
+            /* Gráfico */
+            #btn-add-row { display: none !important; }
+            #chart-container { 
+                break-inside: avoid; 
+                page-break-inside: avoid;
+                height: 280px !important; 
+                width: 90% !important; /* Margem de segurança lateral */
+                margin: 20px auto !important;
+            }
+
+            /* Rodapé Fixo */
+            #page-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 30px;
+                text-align: center;
+                font-size: 10px;
+                color: #94a3b8;
+                font-weight: 500;
+                background-color: white;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                border-top: 1px dashed #e2e8f0;
+                z-index: 9999;
+                margin-bottom: 0 !important;
+                padding-bottom: 5px;
             }
         }
 
@@ -207,6 +246,8 @@
             border-bottom: 2px solid var(--primary);
             font-weight: bold;
         }
+        
+        .emoji-btn:hover { transform: scale(1.2); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
@@ -640,13 +681,21 @@
                                 </tr>
                             </thead>
                             <tbody class="text-slate-700">
-                                <tr><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td></tr>
-                                <tr><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td></tr>
-                                <tr><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td></tr>
-                                <tr><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td></tr>
-                                <tr><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td></tr>
+                                <tr><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave(); updateChartData()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave(); updateChartData()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave(); updateChartData()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave(); updateChartData()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave(); updateChartData()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td><td class="measure-cell" contenteditable="true" onblur="triggerAutoSave()"></td></tr>
                             </tbody>
                         </table>
+                        
+                        <!-- BOTÃO DE ADICIONAR LINHA -->
+                        <div class="mt-2 text-right">
+                             <button id="btn-add-row" onclick="addHistoryRow()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1 rounded text-xs font-bold transition border border-slate-300">
+                                <i class="fa-solid fa-plus"></i> Adicionar Linha
+                             </button>
+                        </div>
+
+                        <!-- GRÁFICO VISUAL (CANVAS) -->
+                        <div id="chart-container" class="mt-6 h-64 w-full">
+                            <canvas id="evolutionChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -700,6 +749,11 @@
         </main>
     </div>
 
+    <!-- RODAPÉ FIXO DE IMPRESSÃO (NOVO) -->
+    <div id="page-footer" class="hidden print-only">
+        RFM - Plano Alimentar - Dietas personalizadas
+    </div>
+
     <!-- MODAL DE SUBSTITUIÇÃO (ATUALIZADO) -->
     <div id="substitution-modal" class="fixed inset-0 modal-overlay z-[60] hidden flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh]">
@@ -711,6 +765,12 @@
             <div class="p-4 bg-indigo-50 border-b border-indigo-100">
                 <div id="sub-source-info" class="text-sm text-indigo-900 mb-3 font-medium"></div>
                 
+                <!-- NOVO: CAMPO DE BUSCA -->
+                <div class="mb-3 relative">
+                     <i class="fa-solid fa-search absolute left-3 top-3 text-indigo-300 text-xs"></i>
+                     <input type="text" id="sub-search-input" onkeyup="filterSubstitutes()" placeholder="Buscar substituto específico..." class="w-full pl-8 pr-3 py-2 text-sm border border-indigo-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-400 bg-white">
+                </div>
+
                 <div class="flex gap-2">
                     <button onclick="filterSubstitutes('carb')" id="btn-sub-carb" class="flex-1 py-2 rounded-lg text-xs font-bold border border-blue-200 bg-white text-blue-600 hover:bg-blue-50 transition shadow-sm">
                         Igualar Carboidrato
@@ -792,6 +852,11 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- EMOJI PICKER POPUP -->
+    <div id="emoji-picker" class="fixed hidden bg-white rounded-xl shadow-2xl border border-slate-200 p-2 w-72 z-[70] grid grid-cols-6 gap-2">
+        <!-- JS Populates -->
     </div>
 
     <!-- Toast -->
@@ -1013,6 +1078,8 @@
         let saveTimeout;
         let currentSubMealId = null;
         let currentSubFoodIndex = null;
+        let currentSubMacro = 'carb'; // Global tracking
+        let evolutionChart = null; // Instância do Gráfico
 
         const themes = {
             emerald: { primary: '#059669', hover: '#047857', light: '#ecfdf5', text: '#065f46', border: '#d1fae5' },
@@ -1027,6 +1094,18 @@
             fuchsia: { primary: '#d946ef', hover: '#c026d3', light: '#fdf4ff', text: '#86198f', border: '#f0abfc' }
         };
 
+        const emojiList = [
+            "☕", "🥛", "🧃", "🍵", "🧉", "🥤", "🥣", "🍽️", "🥡", "🥢", "🍴", "🥄",
+            "🍞", "🥯", "🥐", "🥖", "🥪", "🥨", "🥞", "🧇", "🥚", "🍳", "🧈", "🧀",
+            "🍎", "🍌", "🍇", "🍓", "🫐", "🥝", "🥑", "🍍", "🥭", "🍑", "🍒", "🍈", "🍉", "🍊", "🍋",
+            "🥗", "🥬", "🥦", "🥒", "🍅", "🥕", "🌽", "🥔", "🧅", "🧄", "🍠", "🥔",
+            "🥩", "🍗", "🍖", "🥓", "🍔", "🌭", "🥪", "🌮", "🌯", "🥙",
+            "🐟", "🍣", "🍤", "🦞", "🦀", "🦑", "🐙",
+            "🍚", "🍝", "🍜", "🍲", "🍛", "🍱", "🥟", "🍙", "🍘",
+            "🍫", "🍪", "🥜", "🍯", "🍮", "🧁", "🍰", "🍩", "🍦", "🍧", "🍨",
+            "💊", "🧴", "🏋️", "💪", "⚡", "🔋"
+        ];
+
         function init() {
             loadCustomFoodsFromStorage();
             const dateInput = document.getElementById('diet-date');
@@ -1035,6 +1114,8 @@
                 updateDateDisplay();
             }
             
+            initChart(); // Inicializa o gráfico vazio
+
             const lastPatientId = localStorage.getItem('diet_last_patient_id');
             let loaded = false;
             
@@ -1046,6 +1127,82 @@
                 createNewPatient();
             }
             renderFoodSelect();
+            renderEmojiPicker();
+        }
+        
+        // --- FUNÇÃO CHART.JS (NOVA) ---
+        function initChart() {
+            const ctx = document.getElementById('evolutionChart').getContext('2d');
+            evolutionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [], // Datas
+                    datasets: [
+                        { label: 'Peso (kg)', data: [], borderColor: '#059669', backgroundColor: '#059669', tension: 0.3 },
+                        { label: 'Cintura (cm)', data: [], borderColor: '#2563eb', backgroundColor: '#2563eb', tension: 0.3, hidden: true },
+                        { label: 'Abdômen (cm)', data: [], borderColor: '#d97706', backgroundColor: '#d97706', tension: 0.3 },
+                        { label: 'Quadril (cm)', data: [], borderColor: '#7c3aed', backgroundColor: '#7c3aed', tension: 0.3, hidden: true }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        function updateChartData() {
+            if(!evolutionChart) return;
+            
+            const labels = [];
+            const weight = [];
+            const waist = [];
+            const abdomen = [];
+            const hips = [];
+
+            const rows = document.querySelectorAll('#history-table tbody tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const date = cells[0].innerText.trim();
+                const w = parseFloat(cells[1].innerText.replace(',','.')) || null;
+                const c = parseFloat(cells[2].innerText.replace(',','.')) || null;
+                const a = parseFloat(cells[3].innerText.replace(',','.')) || null;
+                const h = parseFloat(cells[4].innerText.replace(',','.')) || null;
+
+                if(date) {
+                    labels.push(date);
+                    weight.push(w);
+                    waist.push(c);
+                    abdomen.push(a);
+                    hips.push(h);
+                }
+            });
+
+            evolutionChart.data.labels = labels;
+            evolutionChart.data.datasets[0].data = weight;
+            evolutionChart.data.datasets[1].data = waist;
+            evolutionChart.data.datasets[2].data = abdomen;
+            evolutionChart.data.datasets[3].data = hips;
+            evolutionChart.update();
+        }
+
+        // --- FUNÇÃO ADICIONAR LINHA (NOVA) ---
+        function addHistoryRow() {
+            const tbody = document.querySelector('#history-table tbody');
+            const tr = document.createElement('tr');
+            // Cria 7 células editáveis com triggers
+            for(let i=0; i<7; i++) {
+                const td = document.createElement('td');
+                td.className = "measure-cell";
+                td.contentEditable = "true";
+                // Lógica Dinâmica: Salva e Atualiza Gráfico ao sair do campo
+                td.onblur = function() { triggerAutoSave(); updateChartData(); };
+                tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
         }
 
         // ==========================================
@@ -1084,6 +1241,81 @@
             triggerAutoSave();
             showToast("Valor atualizado", "neutral");
         }
+
+        function swapMealOptions(mealId, opt1, opt2) {
+            const meal = dietMeals.find(m => m.id === mealId);
+            if(!meal) return;
+            
+            meal.foods.forEach(f => {
+                if (f.option === opt1) f.option = 'TEMP';
+            });
+            meal.foods.forEach(f => {
+                if (f.option === opt2) f.option = opt1;
+            });
+            meal.foods.forEach(f => {
+                if (f.option === 'TEMP') f.option = opt2;
+            });
+            
+            renderDiet();
+            triggerAutoSave();
+            showToast(`Opções ${opt1} e ${opt2} trocadas!`, 'success');
+        }
+
+        // --- EMOJI LOGIC ---
+        function renderEmojiPicker() {
+            const container = document.getElementById('emoji-picker');
+            container.innerHTML = emojiList.map(e => `<button onclick="insertEmoji('${e}')" class="emoji-btn text-xl p-1 hover:bg-slate-100 rounded transition">${e}</button>`).join('');
+        }
+
+        let currentEmojiTargetId = null;
+        
+        function toggleEmojiPicker(mealId, event) {
+            event.stopPropagation();
+            currentEmojiTargetId = mealId;
+            const picker = document.getElementById('emoji-picker');
+            const btn = event.currentTarget;
+            const rect = btn.getBoundingClientRect();
+            
+            if (picker.classList.contains('hidden')) {
+                // Posicionar relativo ao botão clicado, mas garantindo que fique na tela
+                picker.style.top = (rect.bottom + 5) + 'px'; 
+                // Se estiver muito embaixo, joga pra cima
+                if (rect.bottom + 300 > window.innerHeight) {
+                      picker.style.top = (rect.top - 200) + 'px';
+                }
+                
+                // Ajuste horizontal simples
+                let left = rect.left;
+                if (left + 288 > window.innerWidth) { // 288px é approx largura do picker
+                    left = window.innerWidth - 300;
+                }
+                picker.style.left = left + 'px';
+                
+                picker.classList.remove('hidden');
+            } else {
+                picker.classList.add('hidden');
+            }
+        }
+
+        function insertEmoji(emoji) {
+            if (currentEmojiTargetId) {
+                const meal = dietMeals.find(m => m.id === currentEmojiTargetId);
+                if (meal) {
+                    meal.title += ' ' + emoji;
+                    renderDiet();
+                    triggerAutoSave();
+                }
+            }
+            document.getElementById('emoji-picker').classList.add('hidden');
+        }
+
+        // Close emoji picker when clicking outside
+        document.addEventListener('click', (e) => {
+            const picker = document.getElementById('emoji-picker');
+            if (!picker.contains(e.target) && !e.target.closest('.emoji-trigger')) {
+                picker.classList.add('hidden');
+            }
+        });
 
         
         function exportBackup() {
@@ -1220,7 +1452,12 @@
             document.getElementById('calc-height').value = "";
             document.getElementById('calc-age').value = "";
             document.getElementById('goals-area').innerText = "";
-            document.querySelectorAll('#history-table td').forEach(c => c.innerText = "");
+            
+            // Limpa tabela e deixa linhas iniciais
+            const tbody = document.querySelector('#history-table tbody');
+            tbody.innerHTML = '';
+            for(let i=0; i<5; i++) addHistoryRow(); // Adiciona 5 linhas padrão
+            updateChartData();
             
             saveCurrentPatientState();
             renderMealSelect(); renderDiet(); setTheme('emerald'); closePatientModal(); showToast("Novo paciente criado!");
@@ -1270,13 +1507,31 @@
                     setImg('logo-img-main', 'logo-placeholder', data.images.mainLogo);
                     setImg('logo-img-footer', 'logo-placeholder-footer', data.images.footerLogo);
                 }
-                if(data.history) {
-                    const rows = document.querySelectorAll('#history-table tbody tr');
-                    data.history.forEach((r,i) => { if(rows[i]) rows[i].querySelectorAll('td').forEach((c,j) => c.innerText = r[j]||""); });
+                
+                // LÓGICA DE CARREGAMENTO DO HISTÓRICO CORRIGIDA PARA LINHAS INFINITAS
+                const tbody = document.querySelector('#history-table tbody');
+                tbody.innerHTML = ''; // Limpa tudo
+                if(data.history && data.history.length > 0) {
+                    data.history.forEach((r) => { 
+                        const tr = document.createElement('tr');
+                        r.forEach(cellText => {
+                            const td = document.createElement('td');
+                            td.className = "measure-cell";
+                            td.contentEditable = "true";
+                            td.innerText = cellText;
+                            td.onblur = function() { triggerAutoSave(); updateChartData(); };
+                            tr.appendChild(td);
+                        });
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                     for(let i=0; i<5; i++) addHistoryRow(); // Default
                 }
+
                 if(data.goalsText) document.getElementById('goals-area').innerText = data.goalsText;
 
-                setTheme(currentTheme); renderMealSelect(); renderDiet(); calculateEnergy(); updateDateDisplay(); toggleBodyFatInput();
+                setTheme(currentTheme); renderMealSelect(); renderDiet(); calculateEnergy(); updateDateDisplay(); toggleBodyFatInput(); 
+                updateChartData(); // Atualiza gráfico ao carregar
                 localStorage.setItem('diet_last_patient_id', id);
                 closePatientModal(); showToast("Paciente carregado!");
                 return true;
@@ -1399,6 +1654,9 @@
             if (!meal || !meal.foods[foodIndex]) return;
             const f = meal.foods[foodIndex];
             
+            // Limpa o campo de busca ao abrir
+            if(document.getElementById('sub-search-input')) document.getElementById('sub-search-input').value = '';
+
             currentSubSource = {
                 name: f.name,
                 cal: f.totalCal,
@@ -1462,6 +1720,10 @@
             const tbody = document.getElementById('sub-list');
             tbody.innerHTML = '';
             
+            // Se macro for passado, atualiza o global. Se não, usa o global (caso da busca)
+            if (macro) currentSubMacro = macro;
+            else macro = currentSubMacro;
+
             // Highlight active button
             ['carb','prot','fat'].forEach(m => {
                 const btn = document.getElementById('btn-sub-'+m);
@@ -1488,7 +1750,7 @@
             };
 
             // Find candidates
-            const candidates = foodDatabase.map(f => {
+            let candidates = foodDatabase.map(f => {
                 // macro content per 1g of product
                 const contentPerGram = f[macro] / 100;
                 
@@ -1522,6 +1784,12 @@
                 };
             }).filter(x => x !== null);
             
+            // FILTRO DE BUSCA (Se houver texto digitado)
+            const searchTerm = document.getElementById('sub-search-input').value.toLowerCase().trim();
+            if (searchTerm.length > 0) {
+                candidates = candidates.filter(c => c.name.toLowerCase().includes(searchTerm));
+            }
+
             // Sort by lowest Calorie Difference to keep diet balanced
             candidates.sort((a,b) => a.sortMetric - b.sortMetric);
             
@@ -1549,6 +1817,10 @@
                 `;
                 tbody.appendChild(tr);
             });
+            
+            if (candidates.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">Nenhum substituto encontrado para "${searchTerm}".</td></tr>`;
+            }
         }
 
         function renderDiet() {
@@ -1564,15 +1836,46 @@
             dietMeals.forEach((m, idx) => {
                 let mc={cal:0, c:0, p:0, f:0, fib:0};
                 m.foods.forEach(f => {
-                    mc.cal+=f.totalCal; mc.c+=f.totalCarb; mc.p+=f.totalProt; mc.f+=f.totalFat; mc.fib+=(f.totalFiber||0);
-                    if(f.option==='A'){ dt.cal+=f.totalCal; dt.c+=f.totalCarb; dt.p+=f.totalProt; dt.f+=f.totalFat; dt.fib+=(f.totalFiber||0); }
+                    // Only sum Main Option (A) for Meal Footer logic
+                    if(f.option==='A'){ 
+                        mc.cal+=f.totalCal; mc.c+=f.totalCarb; mc.p+=f.totalProt; mc.f+=f.totalFat; mc.fib+=(f.totalFiber||0);
+                        dt.cal+=f.totalCal; dt.c+=f.totalCarb; dt.p+=f.totalProt; dt.f+=f.totalFat; dt.fib+=(f.totalFiber||0); 
+                    }
                 });
 
                 let html = '';
                 ['A','B','C'].forEach(opt => {
                     const g = m.foods.filter(f=>f.option===opt);
                     if(g.length>0) {
-                        if(opt!=='A' || m.foods.some(x=>x.option!=='A')) html+=`<div class="bg-slate-50 px-4 py-2 text-xs font-bold text-slate-500 uppercase border-y border-slate-100 mt-2">${opt==='A'?'Opção Principal':'Opção '+opt}</div>`;
+                        // HEADER DA OPÇÃO COM BOTÃO DE TROCA
+                        let headerTitle = opt==='A' ? 'Opção Principal' : 'Opção '+opt;
+                        let swapControls = '';
+                        
+                        if(opt === 'A') {
+                            swapControls = `
+                                <div class="flex gap-2 no-print">
+                                    <button onclick="swapMealOptions(${m.id}, 'A', 'B')" class="text-[10px] bg-slate-200 hover:bg-slate-300 px-2 py-0.5 rounded text-slate-600 font-normal" title="Trocar com Opção B">⬇ B</button>
+                                    <button onclick="swapMealOptions(${m.id}, 'A', 'C')" class="text-[10px] bg-slate-200 hover:bg-slate-300 px-2 py-0.5 rounded text-slate-600 font-normal" title="Trocar com Opção C">⬇ C</button>
+                                </div>
+                            `;
+                        } else {
+                            swapControls = `
+                                <div class="no-print">
+                                    <button onclick="swapMealOptions(${m.id}, 'A', '${opt}')" class="text-[10px] bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-2 py-0.5 rounded font-bold border border-emerald-200 flex items-center gap-1">
+                                        <i class="fa-solid fa-arrow-up"></i> Tornar Principal
+                                    </button>
+                                </div>
+                            `;
+                        }
+
+                        if(opt!=='A' || m.foods.some(x=>x.option!=='A')) {
+                            html+=`
+                            <div class="bg-slate-50 px-4 py-2 border-y border-slate-100 mt-2 flex justify-between items-center group/header">
+                                <span class="text-xs font-bold text-slate-500 uppercase">${headerTitle}</span>
+                                ${swapControls}
+                            </div>`;
+                        }
+
                         html+=`<div class="table-container"><table class="w-full text-left text-sm"><tbody class="divide-y divide-slate-100">`;
                         g.forEach(f => {
                             const originalIndex = m.foods.indexOf(f);
@@ -1600,21 +1903,21 @@
                 
                 if(m.foods.length===0) html=`<div class="p-6 text-center text-slate-400 text-sm italic no-print">Nenhum alimento.</div>`;
 
-                c.innerHTML += `<div class="card bg-white rounded-xl shadow-sm theme-border border overflow-hidden break-inside-avoid relative group mt-4">
+                c.innerHTML += `<div class="card meal-card bg-white rounded-xl shadow-sm theme-border border overflow-hidden relative group mt-4">
                     <div class="absolute top-4 right-4 flex gap-2 no-print opacity-0 group-hover:opacity-100 z-10"><button onclick="duplicateMeal(${m.id})" class="text-slate-300 hover:text-blue-500"><i class="fa-regular fa-copy"></i></button><button onclick="deleteMeal(${m.id})" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></div>
-                    <div class="meal-header theme-bg-light p-4 border-b theme-border flex justify-between items-center"><div class="flex items-center gap-3"><div class="flex flex-col gap-1 no-print"><button onclick="moveMeal(${idx},-1)"><i class="fa-solid fa-chevron-up text-slate-400 text-[10px]"></i></button><button onclick="moveMeal(${idx},1)"><i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i></button></div><h3 class="font-bold text-slate-700 cursor-text" contenteditable="true" onblur="updateMealTitle(${m.id},this.innerText)">${m.title}</h3></div></div>
+                    <div class="meal-header theme-bg-light p-4 border-b theme-border flex justify-between items-center"><div class="flex items-center gap-3"><div class="flex flex-col gap-1 no-print"><button onclick="moveMeal(${idx},-1)"><i class="fa-solid fa-chevron-up text-slate-400 text-[10px]"></i></button><button onclick="moveMeal(${idx},1)"><i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i></button></div><h3 class="font-bold text-slate-700 cursor-text" contenteditable="true" onblur="updateMealTitle(${m.id},this.innerText)">${m.title}</h3><button onclick="toggleEmojiPicker(${m.id}, event)" class="text-slate-400 hover:text-yellow-500 no-print emoji-trigger"><i class="fa-solid fa-face-smile"></i></button></div></div>
                     <div>${html}</div>
-                    <div class="totals-footer p-3 bg-slate-50 border-t border-slate-100 flex justify-end gap-4 text-xs font-bold text-slate-600"><span>Total:</span><span>${mc.cal.toFixed(0)} kcal</span><span class="text-blue-600">C: ${mc.c.toFixed(0)}g</span><span class="text-emerald-600">P: ${mc.p.toFixed(0)}g</span><span class="text-yellow-600">G: ${mc.f.toFixed(0)}g</span><span class="text-orange-600">F: ${mc.fib.toFixed(1)}g</span></div>
+                    <div class="totals-footer p-3 bg-slate-50 border-t border-slate-100 flex justify-end gap-4 text-xs font-bold text-slate-600"><span>Total (Principal):</span><span>${mc.cal.toFixed(0)} kcal</span><span class="text-blue-600">C: ${mc.c.toFixed(0)}g</span><span class="text-emerald-600">P: ${mc.p.toFixed(0)}g</span><span class="text-yellow-600">G: ${mc.f.toFixed(0)}g</span><span class="text-orange-600">F: ${mc.fib.toFixed(1)}g</span></div>
                     <div class="px-4 pb-4 pt-2 border-t border-slate-100 relative group/obs"><div class="flex justify-between items-center mb-1"><span class="text-[10px] font-bold text-slate-400 uppercase">Observações</span><button onclick="clearMealObservation(${m.id})" class="no-print opacity-0 group-hover/obs:opacity-100 text-slate-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button></div><div class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm text-slate-600 outline-none" contenteditable="true" onblur="updateMealObservation(${m.id},this.innerText)">${m.observation||''}</div></div>
                 </div>`;
             });
 
             // CARD: INGESTÃO DIÁRIA (DARK) - Atualizado com FIBRAS
-            c.innerHTML += `<div class="card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 break-inside-avoid mt-6"><div class="p-4 border-b border-slate-700 flex justify-between"><h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-chart-pie text-emerald-400"></i> 🍎 Ingestão Diária</h3><span class="text-xs text-slate-400">(Opções A)</span></div><div class="p-6 grid grid-cols-2 md:grid-cols-5 gap-6 text-center"><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Calorias</div><div class="text-3xl font-bold">${dt.cal.toFixed(0)}</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Carboidrato</div><div class="text-2xl font-bold text-blue-400">${dt.c.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Proteína</div><div class="text-2xl font-bold text-emerald-400">${dt.p.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Gordura</div><div class="text-2xl font-bold text-yellow-400">${dt.f.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Fibras</div><div class="text-2xl font-bold text-orange-400">${dt.fib.toFixed(0)}g</div></div></div></div>`;
+            c.innerHTML += `<div class="card summary-card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 mt-6"><div class="p-4 border-b border-slate-700 flex justify-between"><h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-chart-pie text-emerald-400"></i> 🍎 Ingestão Diária</h3><span class="text-xs text-slate-400">(Opções A)</span></div><div class="p-6 grid grid-cols-2 md:grid-cols-5 gap-6 text-center"><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Calorias</div><div class="text-3xl font-bold">${dt.cal.toFixed(0)}</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Carboidrato</div><div class="text-2xl font-bold text-blue-400">${dt.c.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Proteína</div><div class="text-2xl font-bold text-emerald-400">${dt.p.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Gordura</div><div class="text-2xl font-bold text-yellow-400">${dt.f.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Fibras</div><div class="text-2xl font-bold text-orange-400">${dt.fib.toFixed(0)}g</div></div></div></div>`;
 
             // CARD: META DIÁRIA (AGORA DARK TAMBÉM) - Atualizado
             if(showGoals) {
-                c.innerHTML += `<div class="card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 break-inside-avoid mt-4 relative group">
+                c.innerHTML += `<div class="card summary-card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 mt-4 relative group">
                     <button onclick="removeGoals()" class="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition no-print opacity-0 group-hover:opacity-100" title="Ocultar Metas"><i class="fa-solid fa-xmark"></i></button>
                     <div class="p-4 border-b border-slate-700 flex justify-between items-center">
                         <h3 class="font-bold text-lg flex items-center gap-2">
