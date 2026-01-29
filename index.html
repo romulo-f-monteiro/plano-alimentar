@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RFM Plano Alimentar - Dietas Personalizadas</title>
+    <title>Plano Alimentar - Dietas Personalizadas</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -127,9 +127,13 @@
                 break-inside: avoid; 
                 page-break-inside: avoid; 
                 height: 300px !important; 
-                width: 90% !important; /* Reduzido para evitar corte no lado direito */
+                width: 85% !important; /* Reduzido para 85% para garantir que não corte nas bordas */
                 margin: 20px auto !important; 
                 display: block !important;
+            }
+            #chart-container canvas {
+                max-width: 100% !important;
+                height: auto !important;
             }
             
             #page-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 30px; text-align: center; font-size: 10px; color: #94a3b8; font-weight: 500; background-color: white; display: flex !important; align-items: center; justify-content: center; border-top: 1px dashed #e2e8f0; z-index: 9999; margin-bottom: 0 !important; padding-bottom: 5px; }
@@ -309,7 +313,7 @@
                     <span id="header-initials" class="text-xl font-black tracking-tighter">RFM</span>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold">RFM Plano Alimentar</h1>
+                    <h1 class="text-xl font-bold">Plano Alimentar</h1>
                     <p class="text-xs opacity-90">Dietas Personalizadas</p>
                 </div>
             </div>
@@ -1089,4 +1093,3 @@
     </script>
 </body>
 </html>
-
