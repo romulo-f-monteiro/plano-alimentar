@@ -87,7 +87,7 @@
             body { background-color: white; padding: 10mm 10mm !important; margin: 0 !important; zoom: 0.95; }
             
             /* Ocultar elementos específicos na impressão */
-            .no-print, #toast, #splash-screen, .hide-in-print, .nutritionist-only { display: none !important; }
+            .no-print, #toast, #splash-screen, #patient-welcome-screen, .hide-in-print, .nutritionist-only { display: none !important; }
             
             /* OCULTAR MACROS INDIVIDUAIS NO PDF */
             .col-macro, .meal-table-macros { display: none !important; }
@@ -126,9 +126,10 @@
             #chart-container { 
                 break-inside: avoid; 
                 page-break-inside: avoid; 
-                height: 350px !important; 
-                width: 95% !important; /* Reduzido para evitar corte */
+                height: 300px !important; 
+                width: 90% !important; /* Reduzido para evitar corte no lado direito */
                 margin: 20px auto !important; 
+                display: block !important;
             }
             
             #page-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 30px; text-align: center; font-size: 10px; color: #94a3b8; font-weight: 500; background-color: white; display: flex !important; align-items: center; justify-content: center; border-top: 1px dashed #e2e8f0; z-index: 9999; margin-bottom: 0 !important; padding-bottom: 5px; }
@@ -259,7 +260,7 @@
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
     <!-- ============================== -->
-    <!-- TELA INICIAL (SPLASH SCREEN) -->
+    <!-- TELA INICIAL (SPLASH SCREEN - NUTRICIONISTA) -->
     <!-- ============================== -->
     <div id="splash-screen" class="fixed inset-0 z-[100] bg-gradient-to-br from-emerald-600 to-teal-900 flex flex-col items-center justify-center text-white px-4 transition-opacity duration-700 ease-out no-print">
         <div class="max-w-md w-full bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-2xl shadow-2xl text-center transform transition-all hover:scale-[1.01]">
@@ -280,6 +281,26 @@
         </div>
     </div>
 
+    <!-- ============================== -->
+    <!-- TELA DE BOAS VINDAS (PACIENTE) -->
+    <!-- ============================== -->
+    <div id="patient-welcome-screen" class="fixed inset-0 z-[100] bg-gradient-to-br from-blue-500 to-indigo-900 hidden flex-col items-center justify-center text-white px-4 transition-opacity duration-700 ease-out no-print">
+        <div class="max-w-md w-full bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-2xl shadow-2xl text-center transform transition-all hover:scale-[1.01]">
+            <div class="mb-6 inline-flex items-center justify-center w-20 h-20 bg-white rounded-full text-blue-600 shadow-lg">
+                <i class="fa-solid fa-heart-pulse text-4xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold mb-4">Olá!</h1>
+            <p class="text-lg opacity-90 mb-6 leading-relaxed font-light">
+                Seja muito bem-vindo(a) à sua jornada de cuidados. Fique à vontade e conte comigo sempre que precisar.
+                <br><br>
+                <strong>Abs, Nutri</strong>
+            </p>
+            <button onclick="closePatientWelcome()" class="w-full bg-white text-blue-800 font-bold py-4 rounded-xl shadow-lg hover:bg-blue-50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
+                Visualizar minha dieta <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- Header Principal -->
     <header class="theme-bg text-white shadow-lg no-print transition-colors duration-300">
         <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -296,7 +317,7 @@
                 <button onclick="openPatientModal()" class="nutritionist-only bg-slate-900/30 hover:bg-slate-900/50 text-white px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2 border border-white/20">
                     <i class="fa-solid fa-users"></i> <span id="current-patient-label">Pacientes</span>
                 </button>
-                <button onclick="shareLink()" class="nutritionist-only bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2 border border-blue-400">
+                <button onclick="openShareModal()" class="nutritionist-only bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2 border border-blue-400">
                     <i class="fa-solid fa-share-nodes"></i> Compartilhar Link
                 </button>
                 <button onclick="printDiet()" class="bg-white text-slate-700 hover:bg-slate-100 px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2">
@@ -590,6 +611,36 @@
         </div>
     </div>
 
+    <!-- MODAL INFORMATIVO DE COMPARTILHAMENTO -->
+    <div id="share-info-modal" class="fixed inset-0 modal-overlay z-[70] hidden flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100">
+            <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-share-nodes"></i> Compartilhar Link</h3>
+                <button onclick="closeShareModal()" class="text-blue-200 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                    Nesta seção, você pode salvar o link para envio ao paciente. Vale lembrar que o link é extenso, portanto recomenda-se utilizar sites de encurtamento de links. 
+                    <br><br>
+                    Caso prefira, você também pode salvar o arquivo em PDF para maior comodidade.
+                </p>
+                
+                <div class="flex gap-3 mb-6">
+                    <a href="https://tinyurl.com/" target="_blank" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold text-center border border-slate-300 transition">
+                        <i class="fa-solid fa-link"></i> TinyURL
+                    </a>
+                    <a href="https://is.gd/create.php" target="_blank" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold text-center border border-slate-300 transition">
+                        <i class="fa-solid fa-link"></i> is.gd
+                    </a>
+                </div>
+
+                <button onclick="generateAndCopyLink()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-regular fa-copy"></i> Copiar Link Gerado
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL PACIENTES -->
     <div id="patient-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
@@ -611,6 +662,14 @@
 
     <script>
         function closeSplash() { const splash = document.getElementById('splash-screen'); splash.style.opacity = '0'; setTimeout(() => { splash.style.display = 'none'; }, 700); }
+        
+        function closePatientWelcome() {
+             const welcome = document.getElementById('patient-welcome-screen');
+             welcome.style.opacity = '0';
+             setTimeout(() => {
+                 welcome.style.display = 'none';
+             }, 700);
+        }
 
         // DADOS TACO (Resumido para o exemplo - manter sua lista completa)
         let foodDatabase = [
@@ -668,8 +727,14 @@
             const name = document.getElementById('prof-name').value || "RFM";
             const parts = name.trim().split(" ");
             let initials = "";
-            if (parts.length > 0) initials += parts[0][0];
-            if (parts.length > 1) initials += parts[parts.length-1][0];
+            // Lógica Atualizada: Pegar 1ª letra das 3 primeiras partes do nome
+            if (parts.length === 1) {
+                initials = parts[0].substring(0, 3);
+            } else {
+                initials = parts[0][0];
+                if (parts.length >= 2) initials += parts[1][0];
+                if (parts.length >= 3) initials += parts[2][0];
+            }
             document.getElementById('header-initials').innerText = initials.toUpperCase() || "RFM";
         }
 
@@ -705,7 +770,16 @@
             return meals;
         }
 
-        function shareLink() {
+        // Funções do Modal de Compartilhamento
+        function openShareModal() {
+            document.getElementById('share-info-modal').classList.remove('hidden');
+        }
+        
+        function closeShareModal() {
+            document.getElementById('share-info-modal').classList.add('hidden');
+        }
+
+        function generateAndCopyLink() {
             const inputs = {};
             ['patient-name','patient-goal','diet-date','prof-name','prof-crn','prof-phone','prof-insta','target-cal','target-carb-pct','target-prot-pct','target-fat-pct', 'target-fiber'].forEach(f => inputs[f] = document.getElementById(f).value);
 
@@ -726,7 +800,15 @@
             const safeName = encodeURIComponent(patientName).replace(/%20/g, '+');
             const url = window.location.href.split('?')[0] + '?nome=' + safeName + '&d=' + compressed;
 
-            navigator.clipboard.writeText(url).then(() => showToast("Link copiado! (Encurtado)", "success")).catch(err => prompt("Copie:", url));
+            navigator.clipboard.writeText(url).then(() => {
+                showToast("Link copiado para área de transferência!", "success");
+                closeShareModal();
+            }).catch(err => prompt("Copie:", url));
+        }
+        
+        // Mantém função antiga para compatibilidade se chamada diretamente, mas redireciona para modal
+        function shareLink() {
+            openShareModal();
         }
 
         function checkShareMode() {
@@ -785,6 +867,10 @@
 
                     initChart();
                     updateChartData();
+
+                    // SHOW WELCOME SCREEN INSTEAD OF CONTENT IMMEDIATELY
+                    document.getElementById('patient-welcome-screen').classList.remove('hidden');
+                    document.getElementById('patient-welcome-screen').style.display = 'flex';
 
                     document.body.classList.add('view-mode');
                     document.getElementById('splash-screen').style.display = 'none';
@@ -1003,3 +1089,4 @@
     </script>
 </body>
 </html>
+
