@@ -99,7 +99,7 @@
             body { background-color: white; padding: 10mm 10mm !important; margin: 0 !important; zoom: 0.95; }
             
             /* Ocultar elementos específicos na impressão */
-            .no-print, #toast, #splash-screen, #patient-welcome-screen, .hide-in-print, .nutritionist-only { display: none !important; }
+            .no-print, #toast, #splash-screen, #patient-welcome-screen, .hide-in-print, .nutritionist-only, .hidden-print-section { display: none !important; }
             
             /* OCULTAR MACROS INDIVIDUAIS NO PDF */
             .col-macro, .meal-table-macros { display: none !important; }
@@ -153,6 +153,17 @@
             /* Correção Logo na Impressão */
             #logo-container-wrapper { display: block !important; }
             .upload-ui-controls { display: none !important; }
+
+            /* Estilos para os marcadores de hábito na impressão */
+            .habit-check { 
+                border: 1px solid #cbd5e1 !important; 
+                print-color-adjust: exact !important;
+                -webkit-print-color-adjust: exact !important;
+            }
+            .habit-check.checked {
+                background-color: var(--primary) !important;
+                border-color: var(--primary) !important;
+            }
         }
 
         .editable-div {
@@ -160,7 +171,8 @@
             overflow: hidden;
             outline: none;
         }
-        .editable-div:empty:before {
+        /* Atualizado para funcionar em qualquer campo editável (como nas atividades) */
+        [contenteditable]:empty:before {
             content: attr(placeholder);
             color: #94a3b8;
         }
@@ -270,6 +282,28 @@
             text-overflow: clip; 
             overflow: visible;
         }
+
+        /* Estilos para Metas de Hábito */
+        .habit-grid {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            gap: 4px;
+        }
+        @media (min-width: 640px) {
+            .habit-grid {
+                grid-template-columns: repeat(30, 1fr);
+                gap: 6px;
+            }
+        }
+        .habit-check {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+        .habit-check:hover { transform: scale(1.1); }
+        .habit-check.checked { background-color: var(--primary); border-color: var(--primary); }
         
     </style>
 </head>
@@ -543,16 +577,51 @@
             <div class="lg:col-span-9 space-y-6 w-full">
                 <div id="diet-container" class="space-y-6"></div>
 
-                <!-- Metas -->
+                <!-- Nova Seção de Metas (Metas de Hábito) -->
+                <div id="habit-goals-section" class="mt-6 break-inside-avoid relative group">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-700 text-lg flex items-center gap-2"><i class="fa-solid fa-list-check theme-text"></i> Metas</h3>
+                        <div class="flex gap-2">
+                            <button onclick="addCustomGoal()" class="nutritionist-only bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1 rounded text-xs font-bold transition border border-slate-300"><i class="fa-solid fa-plus"></i> Adicionar meta</button>
+                            <button onclick="hideSection('habit-goals-section')" class="nutritionist-only bg-white text-slate-300 hover:text-red-500 px-2 py-1 rounded text-xs transition border border-transparent hover:border-red-100"><i class="fa-solid fa-trash-can"></i> Excluir seção</button>
+                        </div>
+                    </div>
+                    
+                    <div id="habit-goals-container" class="space-y-4">
+                        <!-- Metas inseridas aqui dinamicamente -->
+                    </div>
+                </div>
+
+                <!-- Metas (Texto Livre) -->
                 <div id="goals-card" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-8 break-inside-avoid relative group">
-                    <button onclick="hideSection('goals-card')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition no-print nutritionist-only opacity-0 group-hover:opacity-100"><i class="fa-solid fa-xmark"></i></button>
+                    <button onclick="hideSection('goals-card')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition no-print nutritionist-only opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash-can"></i></button>
                     <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2 text-lg"><i class="fa-solid fa-bullseye theme-text"></i> Orientações e Recomendações</h3>
                     <div id="goals-area" class="editable-div w-full p-2 bg-transparent text-slate-700 leading-relaxed" contenteditable="true" placeholder="Digite aqui..." onblur="triggerAutoSave()"></div>
                 </div>
 
+                <!-- Seção de Atividade Física -->
+                <div id="activity-section" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-6 break-inside-avoid relative group">
+                     <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-700 text-lg flex items-center gap-2"><i class="fa-solid fa-person-running theme-text"></i> Atividade Física</h3>
+                        <div class="flex gap-2 nutritionist-only">
+                             <button onclick="hideSection('activity-section')" class="text-slate-300 hover:text-red-500 px-2 py-1 transition"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div id="activity-list" class="space-y-4 mb-6"></div>
+                    
+                    <div class="flex justify-center mb-6 nutritionist-only">
+                        <button onclick="addActivityRow()" class="bg-slate-50 hover:bg-slate-100 text-slate-600 px-3 py-1 rounded text-xs font-bold transition border border-slate-200"><i class="fa-solid fa-plus"></i> Adicionar nova atividade</button>
+                    </div>
+
+                    <div class="text-[10px] text-slate-400 text-center italic mt-4 border-t border-slate-100 pt-3">
+                        “Consulte um profissional antes de iniciar ou alterar sua rotina de exercícios, pois as informações apresentadas não substituem acompanhamento especializado.”
+                    </div>
+                </div>
+
                 <!-- Histórico -->
                 <div id="history-card" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-6 break-inside-avoid w-full overflow-hidden relative group">
-                    <button onclick="hideSection('history-card')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition no-print nutritionist-only opacity-0 group-hover:opacity-100"><i class="fa-solid fa-xmark"></i></button>
+                    <button onclick="hideSection('history-card')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition no-print nutritionist-only opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash-can"></i></button>
                     <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2 text-lg"><i class="fa-solid fa-weight-scale theme-text"></i> Histórico da composição corporal</h3>
                     <div class="w-full overflow-x-auto"> <!-- Fix: Scroll horizontal no mobile -->
                         <table id="history-table" class="w-full text-xs text-center border-collapse border border-slate-300 min-w-[600px]"> <!-- Fix: Min width forçar scroll -->
@@ -712,8 +781,16 @@
             { id: 5, title: "Jantar", foods: [], observation: "" },
             { id: 6, title: "Ceia", foods: [], observation: "" }
         ];
+        
+        const defaultActivities = [
+             { id: 1, name: "Caminhada - Atual", desc: "Leve, 3x semana, 30min", rec: "Aumentar para 45min" },
+             { id: 2, name: "Musculação - Atual", desc: "4x semana, foco hipertrofia", rec: "Manter intensidade" },
+             { id: 3, name: "Deslocamento Ativo - Atual", desc: "Ir a pé para o trabalho", rec: "" }
+        ];
 
         let dietMeals = JSON.parse(JSON.stringify(defaultMeals));
+        let customGoals = []; // ARRAY PARA AS NOVAS METAS
+        let physicalActivities = JSON.parse(JSON.stringify(defaultActivities)); // Array para Atividades
         let currentTheme = 'emerald';
         let showGoals = true;
         let currentPatientId = null;
@@ -722,6 +799,9 @@
 
         const themes = { emerald: { primary: '#059669', hover: '#047857', light: '#ecfdf5', text: '#065f46', border: '#d1fae5' }, blue: { primary: '#2563eb', hover: '#1d4ed8', light: '#eff6ff', text: '#1e40af', border: '#dbeafe' }, indigo: { primary: '#4f46e5', hover: '#4338ca', light: '#eef2ff', text: '#3730a3', border: '#e0e7ff' }, rose: { primary: '#e11d48', hover: '#be123c', light: '#fff1f2', text: '#9f1239', border: '#ffe4e6' }, amber: { primary: '#d97706', hover: '#b45309', light: '#fffbeb', text: '#92400e', border: '#fef3c7' }, purple: { primary: '#9333ea', hover: '#7e22ce', light: '#f3e8ff', text: '#6b21a8', border: '#e9d5ff' }, cyan: { primary: '#06b6d4', hover: '#0891b2', light: '#ecfeff', text: '#155e75', border: '#cffafe' }, teal: { primary: '#14b8a6', hover: '#0d9488', light: '#f0fdfa', text: '#115e59', border: '#ccfbf1' }, lime: { primary: '#84cc16', hover: '#65a30d', light: '#f7fee7', text: '#3f6212', border: '#d9f99d' }, fuchsia: { primary: '#d946ef', hover: '#c026d3', light: '#fdf4ff', text: '#86198f', border: '#f0abfc' } };
         const emojiList = ["☕", "🥛", "🧃", "🍵", "🧉", "🥤", "🥣", "🍽️", "🥡", "🥢", "🍴", "🥄", "🍞", "🥯", "🥐", "🥖", "🥪", "🥨", "🥞", "🧇", "🥚", "🍳", "🧈", "🧀", "🍎", "🍌", "🍇", "🍓", "🫐", "🥝", "🥑", "🍍", "🥭", "🍑", "🍒", "🍈", "🍉", "🍊", "🍋", "🥗", "🥬", "🥦", "🥒", "🍅", "🥕", "🌽", "🥔", "🧅", "🧄", "🍠", "🥩", "🍗", "🍖", "🥓", "🍔", "🌭", "🥪", "🌮", "🌯", "🥙", "🐟", "🍣", "🍤", "🦞", "🦀", "🦑", "🐙", "🍚", "🍝", "🍜", "🍲", "🍛", "🍱", "🥟", "🍙", "🍘", "🍫", "🍪", "🥜", "🍯", "🍮", "🧁", "🍰", "🍩", "🍦", "🍧", "🍨", "💊", "🧴", "🏋️", "💪", "⚡", "🔋"];
+        
+        // Ícones específicos para as metas de hábito
+        const habitIcons = ["💧", "🌙", "🌱", "💊", "📖", "🧘", "🚶", "📵", "🚭", "🥗", "🏋️", "🍎", "🏃", "🚫🍺", "🏊", "🚲", "🥪", "🍕"];
 
         function init() {
             if (checkShareMode()) return;
@@ -733,6 +813,7 @@
             else createNewPatient();
             renderFoodSelect();
             renderEmojiPicker();
+            renderActivities();
         }
 
         // ========================
@@ -808,8 +889,16 @@
 
             // Otimização: Minificar refeições
             const minifiedMeals = minifyData(dietMeals);
+            
+            // Verificar seções ocultas
+            const hiddenSections = [];
+            if(document.getElementById('habit-goals-section').classList.contains('hidden')) hiddenSections.push('habit-goals-section');
+            if(document.getElementById('activity-section').classList.contains('hidden')) hiddenSections.push('activity-section');
+            if(document.getElementById('goals-card').classList.contains('hidden')) hiddenSections.push('goals-card');
 
-            const shareData = { v: 2, i: inputs, m: minifiedMeals, h: history, t: currentTheme, g: document.getElementById('goals-area').innerText };
+
+            // Adicionando customGoals ao shareData
+            const shareData = { v: 2, i: inputs, m: minifiedMeals, h: history, t: currentTheme, g: document.getElementById('goals-area').innerText, cg: customGoals, pa: physicalActivities, hs: hiddenSections };
             const jsonStr = JSON.stringify(shareData);
             const compressed = LZString.compressToEncodedURIComponent(jsonStr);
             const patientName = document.getElementById('patient-name').value.trim();
@@ -843,12 +932,18 @@
                         currentTheme = c.t || 'emerald';
                         if(c.i) for(const [k, v] of Object.entries(c.i)) { const el=document.getElementById(k); if(el) el.value=v; }
                         if(c.g) document.getElementById('goals-area').innerText = c.g;
+                        customGoals = c.cg || []; // Carrega as metas de hábito
+                        physicalActivities = c.pa || []; // Carrega atividades
+                        if(c.hs) c.hs.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('hidden'); });
+
                     } else {
                         // Legacy support
                         dietMeals = c.meals || [];
                         currentTheme = c.theme || 'emerald';
                         if(c.inputs) for(const [k, v] of Object.entries(c.inputs)) { const el=document.getElementById(k); if(el) el.value=v; }
                         if(c.goalsText) document.getElementById('goals-area').innerText = c.goalsText;
+                        customGoals = [];
+                        physicalActivities = [];
                     }
 
                     // View Mode UI Adjustments
@@ -856,9 +951,11 @@
                     if(pName) pName.outerHTML = `<h1 class="text-3xl font-black text-slate-800 text-center leading-tight mb-1 break-words">${pName.value}</h1>`;
                     const pGoal = document.getElementById('patient-goal');
                     if(pGoal) pGoal.outerHTML = `<p class="text-lg font-medium text-slate-600 text-center mb-2 break-words">${pGoal.value}</p>`;
-
+                    
                     setTheme(currentTheme);
                     renderDiet();
+                    renderCustomGoals(); // Renderiza as metas no modo view
+                    renderActivities(); // Renderiza atividades
                     updateDateDisplay();
                     updateInitials();
 
@@ -951,7 +1048,7 @@
             if(document.querySelectorAll('#history-table tbody tr').length <= 1) return showToast("Mantenha pelo menos uma linha", "error");
             if(confirm("Excluir linha?")) { btn.closest('tr').remove(); triggerAutoSave(); updateChartData(); }
         }
-        function hideSection(id) { if(confirm("Ocultar seção?")) document.getElementById(id).classList.add('hidden'); }
+        function hideSection(id) { if(confirm("Ocultar seção do paciente?")) { document.getElementById(id).classList.add('hidden'); triggerAutoSave(); } }
 
         // --- Table Render Logic (Fixing Mobile "50 g" wrap) ---
         function updateFoodMacro(mid, fid, type, valStr) {
@@ -1043,12 +1140,223 @@
                 </div>`;
             });
 
-            c.innerHTML += `<div class="card summary-card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 mt-6"><div class="p-4 border-b border-slate-700 flex justify-between"><h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-chart-pie text-emerald-400"></i> 🍎 Ingestão Diária</h3><span class="text-xs text-slate-400">(Opções A)</span></div><div class="p-6 grid grid-cols-2 md:grid-cols-5 gap-6 text-center"><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Calorias</div><div class="text-3xl font-bold">${dt.cal.toFixed(0)}</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Carboidrato</div><div class="text-2xl font-bold text-blue-400">${dt.c.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Proteína</div><div class="text-2xl font-bold text-emerald-400">${dt.p.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Gordura</div><div class="text-2xl font-bold text-yellow-400">${dt.f.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Fibras</div><div class="text-2xl font-bold text-orange-400">${dt.fib.toFixed(0)}g</div></div></div></div>`;
+            c.innerHTML += `<div class="card summary-card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 mt-6"><div class="p-4 border-b border-slate-700 flex justify-between"><h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-chart-pie text-emerald-400"></i> 🍎 Ingestão Diária</h3><span class="text-xs text-slate-400"></span></div><div class="p-6 pt-2 pb-6"><div class="grid grid-cols-2 md:grid-cols-5 gap-6 text-center"><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Calorias</div><div class="text-3xl font-bold">${dt.cal.toFixed(0)}</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Carboidrato</div><div class="text-2xl font-bold text-blue-400">${dt.c.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Proteína</div><div class="text-2xl font-bold text-emerald-400">${dt.p.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Gordura</div><div class="text-2xl font-bold text-yellow-400">${dt.f.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Fibras</div><div class="text-2xl font-bold text-orange-400">${dt.fib.toFixed(0)}g</div></div></div><p class="text-xs text-slate-400 mt-6 font-light">Aqui está a soma de todas as opções principais de alimentos que compõem sua dieta. É importante destacar que nem sempre é fácil atingir a meta diária.</p></div></div>`;
 
-            if(showGoals) c.innerHTML += `<div class="card summary-card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 mt-4 relative group"><button onclick="removeGoals()" class="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition no-print nutritionist-only opacity-0 group-hover:opacity-100"><i class="fa-solid fa-xmark"></i></button><div class="p-4 border-b border-slate-700 flex justify-between items-center"><h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-flag-checkered text-emerald-400"></i> Meta Diária</h3></div><div class="p-6 grid grid-cols-2 md:grid-cols-5 gap-6 text-center"><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Kcal</div><div class="text-3xl font-bold text-white">${tc.toFixed(0)}</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Carbo</div><div class="text-2xl font-bold text-blue-400">${(tc*(pc/100)/4).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pc}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Prot</div><div class="text-2xl font-bold text-emerald-400">${(tc*(pp/100)/4).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pp}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Gord</div><div class="text-2xl font-bold text-yellow-400">${(tc*(pf/100)/9).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pf}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Fibras</div><div class="text-2xl font-bold text-orange-400">${tf.toFixed(0)}g</div></div></div></div>`;
+            if(showGoals) c.innerHTML += `<div class="card summary-card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 mt-4 relative group"><button onclick="removeGoals()" class="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition no-print nutritionist-only opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash-can"></i></button><div class="p-4 border-b border-slate-700 flex justify-between items-center"><h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-flag-checkered text-emerald-400"></i> Meta diária de ingestão</h3></div><div class="p-6 pt-2 pb-6"><div class="grid grid-cols-2 md:grid-cols-5 gap-6 text-center"><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Kcal</div><div class="text-3xl font-bold text-white">${tc.toFixed(0)}</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Carbo</div><div class="text-2xl font-bold text-blue-400">${(tc*(pc/100)/4).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pc}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Prot</div><div class="text-2xl font-bold text-emerald-400">${(tc*(pp/100)/4).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pp}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Gord</div><div class="text-2xl font-bold text-yellow-400">${(tc*(pf/100)/9).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pf}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Fibras</div><div class="text-2xl font-bold text-orange-400">${tf.toFixed(0)}g</div></div></div><p class="text-xs text-slate-400 mt-6 font-light">Essa meta diária é definida de acordo com seu objetivo, peso, altura, idade, entre outros fatores.</p></div></div>`;
             
             const w=document.getElementById('comparison-widget'); if(w) w.innerHTML=`<div class="flex justify-end border-b pb-1 mb-2 text-[11px] font-bold text-slate-500"><span>Consumido / Meta</span></div><div class="flex justify-between"><span class="text-slate-500">Calorias:</span><span class="font-bold ${dt.cal-tc>100?'text-red-500':'text-green-500'}">${dt.cal.toFixed(0)} / ${tc.toFixed(0)}</span></div><div class="flex justify-between"><span class="text-blue-500">Carboidrato:</span><span>${dt.c.toFixed(0)}g / ${(tc*(pc/100)/4).toFixed(0)}g</span></div><div class="flex justify-between"><span class="text-emerald-500">Proteína:</span><span>${dt.p.toFixed(0)}g / ${(tc*(pp/100)/4).toFixed(0)}g</span></div><div class="flex justify-between"><span class="text-yellow-500">Gordura:</span><span>${dt.f.toFixed(0)}g / ${(tc*(pf/100)/9).toFixed(0)}g</span></div><div class="flex justify-between"><span class="text-orange-500">Fibras:</span><span>${dt.fib.toFixed(0)}g / ${tf}g</span></div>`;
         }
+
+        // ==================================================
+        // === LÓGICA DAS NOVAS METAS (HÁBITOS) ===
+        // ==================================================
+
+        function renderCustomGoals() {
+            const container = document.getElementById('habit-goals-container');
+            container.innerHTML = '';
+
+            customGoals.forEach((goal, index) => {
+                const daysHtml = goal.days.map((checked, dayIndex) => 
+                    `<div class="habit-check ${checked ? 'checked' : 'bg-slate-100'}" 
+                           onclick="toggleHabitDay(${index}, ${dayIndex})"></div>`
+                ).join('');
+
+                // Opções de ícones para o select
+                const iconOptions = habitIcons.map(icon => 
+                    `<option value="${icon}" ${goal.icon === icon ? 'selected' : ''}>${icon}</option>`
+                ).join('');
+
+                const html = `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 relative group">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center gap-2 flex-1">
+                                <select class="bg-transparent text-xl cursor-pointer outline-none w-12" 
+                                        onchange="updateHabitIcon(${index}, this.value)" 
+                                        ${document.body.classList.contains('view-mode') ? 'disabled' : ''}>
+                                    ${iconOptions}
+                                </select>
+                                <input type="text" 
+                                       class="font-semibold text-slate-700 bg-transparent outline-none w-full border-b border-transparent hover:border-slate-200 focus:border-blue-400 transition" 
+                                       value="${goal.title}" 
+                                       placeholder="Nome da Meta"
+                                       onblur="updateHabitTitle(${index}, this.value)">
+                            </div>
+                            <button onclick="deleteCustomGoal(${index})" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition nutritionist-only"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                        <div class="habit-grid">
+                            ${daysHtml}
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                             <span class="text-[10px] text-slate-300 italic">Marque aqui</span>
+                             <span class="text-[10px] text-slate-400 font-medium">${goal.days.filter(d => d).length}/30 dias</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        function addCustomGoal() {
+            customGoals.push({
+                title: "Nova Meta",
+                icon: "💧",
+                days: Array(30).fill(false)
+            });
+            renderCustomGoals();
+            triggerAutoSave();
+        }
+
+        function deleteCustomGoal(index) {
+            if(confirm("Excluir esta meta?")) {
+                customGoals.splice(index, 1);
+                renderCustomGoals();
+                triggerAutoSave();
+            }
+        }
+
+        function toggleHabitDay(goalIndex, dayIndex) {
+            customGoals[goalIndex].days[dayIndex] = !customGoals[goalIndex].days[dayIndex];
+            renderCustomGoals();
+            triggerAutoSave();
+        }
+
+        function updateHabitTitle(index, newTitle) {
+            customGoals[index].title = newTitle;
+            triggerAutoSave();
+        }
+
+        function updateHabitIcon(index, newIcon) {
+            customGoals[index].icon = newIcon;
+            renderCustomGoals();
+            triggerAutoSave();
+        }
+
+        // ========================================
+        // === LÓGICA DE ATIVIDADES FÍSICAS ===
+        // ========================================
+
+        function renderActivities() {
+            const list = document.getElementById('activity-list');
+            list.innerHTML = '';
+            
+            physicalActivities.forEach((act, idx) => {
+                const html = `
+                    <div class="flex flex-col gap-2 p-4 bg-slate-50 border border-slate-100 rounded-lg group hover:border-slate-200 transition">
+                         <div class="flex gap-2 items-center">
+                             <div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-person-running"></i>
+                             </div>
+                             <div class="flex-1 w-full">
+                                <input type="text" class="font-bold text-slate-700 bg-transparent w-full outline-none placeholder-slate-400 text-sm" 
+                                       value="${act.name}" placeholder="Nome da Atividade" 
+                                       onblur="updateActivityName(${idx}, this.value)">
+                             </div>
+                             <button onclick="deleteActivity(${idx})" class="nutritionist-only text-slate-300 hover:text-red-500 px-2 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash-can"></i></button>
+                         </div>
+                         
+                         <div class="ml-10">
+                            <div class="text-sm text-slate-500 bg-transparent w-full outline-none mb-2 whitespace-pre-wrap break-words cursor-text" 
+                                 contenteditable="true" 
+                                 placeholder="Descreva a prática atual (ex: 3x semana, 30min)..." 
+                                 onblur="updateActivityDesc(${idx}, this.innerText)">${act.desc}</div>
+                            
+                            <div class="flex items-start gap-2 mt-2 pt-2 border-t border-slate-100">
+                                <span class="text-xs font-bold text-emerald-600 uppercase w-24 shrink-0 mt-0.5">Recomendação:</span>
+                                <div class="text-sm font-medium text-slate-700 bg-transparent w-full outline-none whitespace-pre-wrap break-words cursor-text" 
+                                       contenteditable="true" 
+                                       placeholder="Digite a meta recomendada..." 
+                                       onblur="updateActivityRec(${idx}, this.innerText)">${act.rec || ''}</div>
+                            </div>
+                         </div>
+                    </div>
+                `;
+                list.innerHTML += html;
+            });
+        }
+
+        function addActivityRow() {
+            physicalActivities.push({ id: Date.now(), name: "Nova Atividade - Atual", desc: "", rec: "" });
+            renderActivities();
+            triggerAutoSave();
+        }
+        
+        function deleteActivity(idx) {
+             if(confirm("Remover atividade?")) {
+                 physicalActivities.splice(idx, 1);
+                 renderActivities();
+                 triggerAutoSave();
+             }
+        }
+        
+        function updateActivityName(idx, val) {
+            physicalActivities[idx].name = val;
+            triggerAutoSave();
+        }
+
+        function updateActivityDesc(idx, val) {
+            physicalActivities[idx].desc = val;
+            triggerAutoSave();
+        }
+        
+        function updateActivityRec(idx, val) {
+            physicalActivities[idx].rec = val;
+            triggerAutoSave();
+        }
+
+        function addToPlan() {
+            const mid = parseInt(document.getElementById('select-meal').value);
+            const fid = parseInt(document.getElementById('select-food').value);
+            const qty = parseFloat(document.getElementById('input-qty').value);
+            const opt = document.querySelector('input[name="meal-option"]:checked').value;
+
+            if(!mid || !fid || isNaN(qty) || qty <= 0) return showToast("Dados inválidos", "error");
+
+            const meal = dietMeals.find(m => m.id === mid);
+            const food = foodDatabase.find(f => f.id === fid);
+
+            if(!meal || !food) return;
+
+            const fac = qty / 100;
+            const newFood = {
+                ...food,
+                qty: qty,
+                option: opt,
+                totalCal: food.cal * fac,
+                totalCarb: food.carb * fac,
+                totalProt: food.prot * fac,
+                totalFat: food.fat * fac,
+                totalFiber: (food.fiber || 0) * fac
+            };
+
+            meal.foods.push(newFood);
+            renderDiet();
+            triggerAutoSave();
+            showToast("Alimento adicionado!");
+        }
+
+        // --- Recalcular Macros ao editar quantidade ---
+        function updateFoodQty(mid, fid, val) {
+            const m = dietMeals.find(x => x.id === mid);
+            if (!m) return;
+            const f = m.foods[fid];
+            let qty = parseFloat(val);
+            if (isNaN(qty) || qty < 0) qty = 0; // Permite 0, mas evita NaN
+            
+            f.qty = qty;
+            const fac = qty / 100;
+            
+            // Recalcula totais com base nos valores por 100g (que já estão em f.cal, f.carb, etc do objeto original ou minificado)
+            // Se o app usa f.cal como base 100g:
+            f.totalCal = f.cal * fac;
+            f.totalCarb = f.carb * fac;
+            f.totalProt = f.prot * fac;
+            f.totalFat = f.fat * fac;
+            f.totalFiber = (f.fiber || 0) * fac;
+            
+            renderDiet();
+            triggerAutoSave();
+        }
+
 
         // Functions below unchanged but re-declared for scope safety in one file
         function updateFoodName(mid, fid, v) { const m=dietMeals.find(x=>x.id===mid); if(m&&m.foods[fid]) { m.foods[fid].name=v.trim(); triggerAutoSave(); } }
@@ -1075,11 +1383,11 @@
         function savePatientsList(l) { localStorage.setItem('diet_patients_list', JSON.stringify(l)); }
         function openPatientModal() { const l = getPatientsList(); const u = document.getElementById('patient-list'); u.innerHTML = ''; if (l.length === 0) document.getElementById('empty-patients').classList.remove('hidden'); else { document.getElementById('empty-patients').classList.add('hidden'); l.forEach(p => { const a = p.id === currentPatientId; const d = new Date(p.lastModified).toLocaleDateString('pt-BR'); const li = document.createElement('li'); li.className = `p-3 flex justify-between items-center hover:bg-slate-100 transition cursor-pointer ${a ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`; li.onclick = (e) => { if(!e.target.closest('button')) loadPatient(p.id); }; li.innerHTML = `<div><div class="font-bold text-slate-800">${p.name}</div><div class="text-[10px] text-slate-400">Mod: ${d}</div></div><div class="flex gap-2">${a ? '<span class="text-xs text-blue-500 font-bold px-2 py-1 bg-blue-100 rounded">Ativo</span>' : ''}<button onclick="deletePatient('${p.id}')" class="text-slate-300 hover:text-red-500 p-2 transition"><i class="fa-solid fa-trash"></i></button></div>`; u.appendChild(li); }); } document.getElementById('patient-modal').classList.remove('hidden'); }
         function closePatientModal() { document.getElementById('patient-modal').classList.add('hidden'); }
-        function createNewPatient() { currentPatientId = 'pat_' + Date.now(); dietMeals = JSON.parse(JSON.stringify(defaultMeals)); currentTheme = 'emerald'; document.getElementById('patient-name').value = "Novo Paciente"; document.getElementById('patient-goal').value = ""; document.getElementById('diet-date').valueAsDate = new Date(); document.getElementById('logo-img-main').classList.add('hidden'); document.getElementById('logo-placeholder').classList.remove('hidden'); document.getElementById('logo-img-footer').classList.add('hidden'); document.getElementById('logo-placeholder-footer').classList.remove('hidden'); document.getElementById('target-cal').value = 2000; document.getElementById('target-fiber').value = 25; document.getElementById('calc-weight').value = ""; document.getElementById('calc-height').value = ""; document.getElementById('calc-age').value = ""; document.getElementById('goals-area').innerText = ""; const tb = document.querySelector('#history-table tbody'); tb.innerHTML = ''; for(let i=0; i<5; i++) addHistoryRow(); updateChartData(); saveCurrentPatientState(); renderMealSelect(); renderDiet(); setTheme('emerald'); closePatientModal(); showToast("Criado!"); }
+        function createNewPatient() { currentPatientId = 'pat_' + Date.now(); dietMeals = JSON.parse(JSON.stringify(defaultMeals)); customGoals = []; physicalActivities = JSON.parse(JSON.stringify(defaultActivities)); activityGoalText = ""; currentTheme = 'emerald'; document.getElementById('patient-name').value = "Novo Paciente"; document.getElementById('patient-goal').value = ""; document.getElementById('diet-date').valueAsDate = new Date(); document.getElementById('logo-img-main').classList.add('hidden'); document.getElementById('logo-placeholder').classList.remove('hidden'); document.getElementById('logo-img-footer').classList.add('hidden'); document.getElementById('logo-placeholder-footer').classList.remove('hidden'); document.getElementById('target-cal').value = 2000; document.getElementById('target-fiber').value = 25; document.getElementById('calc-weight').value = ""; document.getElementById('calc-height').value = ""; document.getElementById('calc-age').value = ""; document.getElementById('goals-area').innerText = ""; const tb = document.querySelector('#history-table tbody'); tb.innerHTML = ''; for(let i=0; i<5; i++) addHistoryRow(); updateChartData(); saveCurrentPatientState(); renderMealSelect(); renderDiet(); renderCustomGoals(); renderActivities(); setTheme('emerald'); closePatientModal(); showToast("Criado!"); }
         function deletePatient(id) { if(!confirm("Apagar?")) return; let l = getPatientsList().filter(p => p.id !== id); savePatientsList(l); localStorage.removeItem('diet_data_' + id); if(id === currentPatientId) createNewPatient(); else openPatientModal(); }
-        function loadPatient(id) { const d = localStorage.getItem('diet_data_' + id); if (!d) return false; try { const da = JSON.parse(d); currentPatientId = id; dietMeals = (!da.meals || da.meals.length === 0) ? JSON.parse(JSON.stringify(defaultMeals)) : da.meals; currentTheme = da.theme || 'emerald'; const f = ['patient-name','patient-goal','diet-date','prof-name','prof-crn','prof-phone','prof-insta','calc-weight','calc-height','calc-age','calc-bf','target-cal','target-carb-pct','target-prot-pct','target-fat-pct', 'target-fiber']; f.forEach(x => { if(document.getElementById(x) && da.inputs[x]!==undefined) document.getElementById(x).value = da.inputs[x]; }); if(da.selects) { document.getElementById('calc-formula').value = da.selects['calc-formula'] || 'mifflin'; document.getElementById('calc-activity').value = da.selects['calc-activity'] || '1.55'; const r = document.querySelector(`input[name="calc-sex"][value="${da.selects['calc-sex']}"]`); if(r) r.checked = true; } if(da.images) { const s = (i, p, src) => { if(src) { document.getElementById(i).src=src; document.getElementById(i).classList.remove('hidden'); document.getElementById(p).classList.add('hidden'); } else { document.getElementById(i).classList.add('hidden'); document.getElementById(p).classList.remove('hidden'); } }; s('logo-img-main', 'logo-placeholder', da.images.mainLogo); s('logo-img-footer', 'logo-placeholder-footer', da.images.footerLogo); } const tb = document.querySelector('#history-table tbody'); tb.innerHTML = ''; if(da.history && da.history.length > 0) { da.history.forEach((r) => { const tr = document.createElement('tr'); r.forEach(c => { const td = document.createElement('td'); td.className = "measure-cell"; td.contentEditable = "true"; td.innerText = c; td.onblur = function() { triggerAutoSave(); updateChartData(); }; tr.appendChild(td); }); const ta = document.createElement('td'); ta.className = "p-1 text-center no-print col-history-action nutritionist-only"; ta.innerHTML = '<button onclick="deleteHistoryRow(this)" class="text-slate-300 hover:text-red-500 p-1 transition"><i class="fa-solid fa-trash-can"></i></button>'; tr.appendChild(ta); tb.appendChild(tr); }); } else { for(let i=0; i<5; i++) addHistoryRow(); } if(da.goalsText) document.getElementById('goals-area').innerText = da.goalsText; setTheme(currentTheme); renderMealSelect(); renderDiet(); calculateEnergy(); updateDateDisplay(); toggleBodyFatInput(); updateChartData(); updateInitials(); localStorage.setItem('diet_last_patient_id', id); closePatientModal(); showToast("Carregado!"); return true; } catch (e) { return false; } }
+        function loadPatient(id) { const d = localStorage.getItem('diet_data_' + id); if (!d) return false; try { const da = JSON.parse(d); currentPatientId = id; dietMeals = (!da.meals || da.meals.length === 0) ? JSON.parse(JSON.stringify(defaultMeals)) : da.meals; currentTheme = da.theme || 'emerald'; customGoals = da.customGoals || []; physicalActivities = da.physicalActivities || JSON.parse(JSON.stringify(defaultActivities)); activityGoalText = da.activityGoalText || ""; const f = ['patient-name','patient-goal','diet-date','prof-name','prof-crn','prof-phone','prof-insta','calc-weight','calc-height','calc-age','calc-bf','target-cal','target-carb-pct','target-prot-pct','target-fat-pct', 'target-fiber']; f.forEach(x => { if(document.getElementById(x) && da.inputs[x]!==undefined) document.getElementById(x).value = da.inputs[x]; }); if(da.selects) { document.getElementById('calc-formula').value = da.selects['calc-formula'] || 'mifflin'; document.getElementById('calc-activity').value = da.selects['calc-activity'] || '1.55'; const r = document.querySelector(`input[name="calc-sex"][value="${da.selects['calc-sex']}"]`); if(r) r.checked = true; } if(da.images) { const s = (i, p, src) => { if(src) { document.getElementById(i).src=src; document.getElementById(i).classList.remove('hidden'); document.getElementById(p).classList.add('hidden'); } else { document.getElementById(i).classList.add('hidden'); document.getElementById(p).classList.remove('hidden'); } }; s('logo-img-main', 'logo-placeholder', da.images.mainLogo); s('logo-img-footer', 'logo-placeholder-footer', da.images.footerLogo); } const tb = document.querySelector('#history-table tbody'); tb.innerHTML = ''; if(da.history && da.history.length > 0) { da.history.forEach((r) => { const tr = document.createElement('tr'); r.forEach(c => { const td = document.createElement('td'); td.className = "measure-cell"; td.contentEditable = "true"; td.innerText = c; td.onblur = function() { triggerAutoSave(); updateChartData(); }; tr.appendChild(td); }); const ta = document.createElement('td'); ta.className = "p-1 text-center no-print col-history-action nutritionist-only"; ta.innerHTML = '<button onclick="deleteHistoryRow(this)" class="text-slate-300 hover:text-red-500 p-1 transition"><i class="fa-solid fa-trash-can"></i></button>'; tr.appendChild(ta); tb.appendChild(tr); }); } else { for(let i=0; i<5; i++) addHistoryRow(); } if(da.goalsText) document.getElementById('goals-area').innerText = da.goalsText; setTheme(currentTheme); renderMealSelect(); renderDiet(); renderCustomGoals(); renderActivities(); calculateEnergy(); updateDateDisplay(); toggleBodyFatInput(); updateChartData(); updateInitials(); localStorage.setItem('diet_last_patient_id', id); closePatientModal(); showToast("Carregado!"); return true; } catch (e) { return false; } }
         function triggerAutoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(saveCurrentPatientState, 1000); }
-        function saveCurrentPatientState() { if (!currentPatientId) return; const inp = {}; ['patient-name','patient-goal','diet-date','prof-name','prof-crn','prof-phone','prof-insta','calc-weight','calc-height','calc-age','calc-bf','target-cal','target-carb-pct','target-prot-pct','target-fat-pct', 'target-fiber'].forEach(f => inp[f] = document.getElementById(f).value); const his = []; document.querySelectorAll('#history-table tbody tr').forEach(r => { const ro = []; r.querySelectorAll('td.measure-cell').forEach(c => ro.push(c.innerText)); his.push(ro); }); const da = { id: currentPatientId, lastModified: Date.now(), theme: currentTheme, inputs: inp, history: his, meals: dietMeals, goalsText: document.getElementById('goals-area').innerText, selects: { 'calc-formula': document.getElementById('calc-formula').value, 'calc-activity': document.getElementById('calc-activity').value, 'calc-sex': document.querySelector('input[name="calc-sex"]:checked').value }, images: { mainLogo: document.getElementById('logo-img-main').src.includes('data:') ? document.getElementById('logo-img-main').src : null, footerLogo: document.getElementById('logo-img-footer').src.includes('data:') ? document.getElementById('logo-img-footer').src : null } }; localStorage.setItem('diet_data_' + currentPatientId, JSON.stringify(da)); let l = getPatientsList(); const ix = l.findIndex(p => p.id === currentPatientId); const m = { id: currentPatientId, name: inp['patient-name'] || "Sem Nome", lastModified: Date.now() }; if (ix >= 0) l[ix] = m; else l.push(m); savePatientsList(l); const lb = document.getElementById('current-patient-label'); if(lb) lb.innerText = inp['patient-name'] || "Pacientes"; }
+        function saveCurrentPatientState() { if (!currentPatientId) return; const inp = {}; ['patient-name','patient-goal','diet-date','prof-name','prof-crn','prof-phone','prof-insta','calc-weight','calc-height','calc-age','calc-bf','target-cal','target-carb-pct','target-prot-pct','target-fat-pct', 'target-fiber'].forEach(f => inp[f] = document.getElementById(f).value); const his = []; document.querySelectorAll('#history-table tbody tr').forEach(r => { const ro = []; r.querySelectorAll('td.measure-cell').forEach(c => ro.push(c.innerText)); his.push(ro); }); const da = { id: currentPatientId, lastModified: Date.now(), theme: currentTheme, inputs: inp, history: his, meals: dietMeals, customGoals: customGoals, physicalActivities: physicalActivities, activityGoalText: activityGoalText, goalsText: document.getElementById('goals-area').innerText, selects: { 'calc-formula': document.getElementById('calc-formula').value, 'calc-activity': document.getElementById('calc-activity').value, 'calc-sex': document.querySelector('input[name="calc-sex"]:checked').value }, images: { mainLogo: document.getElementById('logo-img-main').src.includes('data:') ? document.getElementById('logo-img-main').src : null, footerLogo: document.getElementById('logo-img-footer').src.includes('data:') ? document.getElementById('logo-img-footer').src : null } }; localStorage.setItem('diet_data_' + currentPatientId, JSON.stringify(da)); let l = getPatientsList(); const ix = l.findIndex(p => p.id === currentPatientId); const m = { id: currentPatientId, name: inp['patient-name'] || "Sem Nome", lastModified: Date.now() }; if (ix >= 0) l[ix] = m; else l.push(m); savePatientsList(l); const lb = document.getElementById('current-patient-label'); if(lb) lb.innerText = inp['patient-name'] || "Pacientes"; }
         function toggleBodyFatInput() { const f = document.getElementById('calc-formula').value; if(f==='tinsley_katch'||f==='cunningham') document.getElementById('bf-container').classList.remove('hidden'); else document.getElementById('bf-container').classList.add('hidden'); }
         function calculateEnergy() { const w = parseFloat(document.getElementById('calc-weight').value)||0, h = parseFloat(document.getElementById('calc-height').value)||0, a = parseFloat(document.getElementById('calc-age').value)||0, bf = parseFloat(document.getElementById('calc-bf').value)||0, act = parseFloat(document.getElementById('calc-activity').value)||1.2, s = document.querySelector('input[name="calc-sex"]:checked').value, f = document.getElementById('calc-formula').value; if(w>0 && h>0) document.getElementById('res-bmi').innerText = (w/((h/100)*(h/100))).toFixed(1); else document.getElementById('res-bmi').innerText = '--'; let b = 0; if(w>0) { if(f==='mifflin' && h>0 && a>0) b = (10*w) + (6.25*h) - (5*a) + (s==='m'?5:-161); else if(f==='harris' && h>0 && a>0) b = s==='m' ? 88.362+(13.397*w)+(4.799*h)-(5.677*a) : 447.593+(9.247*w)+(3.098*h)-(4.330*a); else if(f==='tinsley_ph' && h>0) b = (9.65*w) + (573*(h/100)) - (s==='m'?5.08:4.92); else if((f==='tinsley_katch'||f==='cunningham') && bf>0) { const mlg = w*(1-(bf/100)); b = f==='cunningham' ? 500+(22*mlg) : 370+(21.6*mlg); } } if(b>0) { document.getElementById('res-bmr').innerText = b.toFixed(0)+' kcal'; document.getElementById('res-tdee').innerText = (b*act).toFixed(0)+' kcal'; } else { document.getElementById('res-bmr').innerText = '--'; document.getElementById('res-tdee').innerText = '--'; } }
         function addNewMeal() { const n = document.getElementById('new-meal-name').value.trim(); if(!n) return showToast("Nome vazio","error"); dietMeals.push({ id: Date.now(), title: n, foods: [], observation: "" }); document.getElementById('new-meal-name').value=''; renderMealSelect(); renderDiet(); showToast("Criada!"); }
@@ -1099,10 +1407,11 @@
         let currentSubMealId = null, currentSubFoodIndex = null, currentSubMacro = 'carb', currentSubSource = null;
         function openSubstitutionModal(mid, fid) { currentSubMealId = mid; currentSubFoodIndex = fid; const m = dietMeals.find(x => x.id === mid); if (!m || !m.foods[fid]) return; const f = m.foods[fid]; if(document.getElementById('sub-search-input')) document.getElementById('sub-search-input').value = ''; currentSubSource = { name: f.name, cal: f.totalCal, carb: f.totalCarb, prot: f.totalProt, fat: f.totalFat, fiber: f.totalFiber || 0 }; document.getElementById('sub-source-info').innerHTML = `Base: <b>${f.name}</b> (${f.qty}g)<br><span class='text-xs text-slate-500'>Kcal:${f.totalCal.toFixed(0)} C:${f.totalCarb.toFixed(1)} P:${f.totalProt.toFixed(1)} G:${f.totalFat.toFixed(1)} F:${(f.totalFiber||0).toFixed(1)}</span>`; filterSubstitutes('carb'); document.getElementById('substitution-modal').classList.remove('hidden'); }
         function closeSubModal() { document.getElementById('substitution-modal').classList.add('hidden'); }
-        function filterSubstitutes(mac) { const tb = document.getElementById('sub-list'); tb.innerHTML = ''; if (mac) currentSubMacro = mac; else mac = currentSubMacro; ['carb','prot','fat'].forEach(m => { const b = document.getElementById('btn-sub-'+m); if(m === mac) b.classList.add('ring-2', 'ring-offset-1'); else b.classList.remove('ring-2', 'ring-offset-1'); }); const tv = currentSubSource[mac]; if (tv <= 0.5) { tb.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Sem quantidade significativa.</td></tr>`; return; } const fd = (v) => { const r = Math.round(v); let c = 'text-slate-400'; if(r > 2) c = 'text-red-500 font-bold'; else if(r < -2) c = 'text-emerald-600 font-bold'; return `<span class="${c} text-[10px] font-mono whitespace-nowrap">${r>0?'+':''}${r}</span>`; }; let cands = foodDatabase.map(f => { const cpg = f[mac] / 100; if (cpg <= 0) return null; const nq = tv / cpg; const rc = (f.cal/100)*nq; const dif = rc - currentSubSource.cal; return { id: f.id, name: f.name, qty: nq, d: dif, s: Math.abs(dif) }; }).filter(x => x !== null); const st = document.getElementById('sub-search-input').value.toLowerCase().trim(); if (st.length > 0) cands = cands.filter(c => c.name.toLowerCase().includes(st)); cands.sort((a,b) => a.s - b.s); cands.slice(0, 20).forEach(c => { const rq = Math.round(c.qty); const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 border-b border-slate-50"; tr.innerHTML = `<td class="p-3 font-medium text-sm truncate max-w-[200px]" title="${c.name}">${c.name}</td><td class="p-3 text-center font-bold text-blue-600 text-xs">${rq}g</td><td class="p-3 text-center">${fd(c.d)}</td><td class="p-3 text-center"><button onclick="confirmSubstitution(${c.id}, ${rq})" class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded">Trocar</button></td>`; tb.appendChild(tr); }); if (cands.length === 0) tb.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nada encontrado.</td></tr>`; }
+        function filterSubstitutes(mac) { const tb = document.getElementById('sub-list'); tb.innerHTML = ''; if (mac) currentSubMacro = mac; else mac = currentSubMacro; ['carb','prot','fat'].forEach(m => { const b = document.getElementById('btn-sub-'+m); if(m === mac) b.classList.add('ring-2', 'ring-offset-1'); else b.classList.remove('ring-2', 'ring-offset-1'); }); const tv = currentSubSource[mac]; if (tv <= 0.5) { tb.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Sem quantidade significativa.</td></tr>`; return; } const fd = (v) => { const r = Math.round(v); let c = 'text-slate-400'; if(r > 2) c = 'text-red-500 font-bold'; else if(r < -2) c = 'text-emerald-600 font-bold'; return `<span class="${c} text-[10px] font-mono whitespace-nowrap">${r>0?'+':''}${r}</span>`; }; let cands = foodDatabase.map(f => { const cpg = f[mac] / 100; if (cpg <= 0) return null; const nq = tv / cpg; const rc = (f.cal/100)*nq; const dif = rc - currentSubSource.cal; return { id: f.id, name: f.name, qty: nq, d: dif, s: Math.abs(dif), raw: f }; }).filter(x => x !== null); const st = document.getElementById('sub-search-input').value.toLowerCase().trim(); if (st.length > 0) cands = cands.filter(c => c.name.toLowerCase().includes(st)); cands.sort((a,b) => a.s - b.s); cands.slice(0, 20).forEach(c => { const rq = Math.round(c.qty); const fac = rq / 100; const det = `Kcal:${(c.raw.cal*fac).toFixed(0)} C:${(c.raw.carb*fac).toFixed(1)} P:${(c.raw.prot*fac).toFixed(1)} G:${(c.raw.fat*fac).toFixed(1)}`; const tr = document.createElement('tr'); tr.className = "hover:bg-slate-50 border-b border-slate-50"; tr.innerHTML = `<td class="p-3 font-medium text-sm truncate max-w-[200px]" title="${c.name}">${c.name}<div class="text-[10px] text-slate-400 font-normal">${det}</div></td><td class="p-3 text-center font-bold text-blue-600 text-xs">${rq}g</td><td class="p-3 text-center">${fd(c.d)}</td><td class="p-3 text-center"><button onclick="confirmSubstitution(${c.id}, ${rq})" class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded">Trocar</button></td>`; tb.appendChild(tr); }); if (cands.length === 0) tb.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nada encontrado.</td></tr>`; }
         function confirmSubstitution(nid, nq) { const m = dietMeals.find(x => x.id === currentSubMealId); if(!m || !m.foods[currentSubFoodIndex]) return; const of = m.foods[currentSubFoodIndex]; const db = foodDatabase.find(f => f.id === nid); if(!db) return; const fac = nq / 100; const no = { ...db, qty: nq, option: of.option, totalCal: db.cal*fac, totalCarb: db.carb*fac, totalProt: db.prot*fac, totalFat: db.fat*fac, totalFiber: (db.fiber||0)*fac }; m.foods[currentSubFoodIndex] = no; renderDiet(); triggerAutoSave(); closeSubModal(); showToast("Substituído!"); }
 
         init();
     </script>
 </body>
 </html>
+
