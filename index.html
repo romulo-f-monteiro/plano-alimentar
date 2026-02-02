@@ -332,18 +332,17 @@
     </div>
 
     <!-- ============================== -->
-    <!-- TELA DE BOAS VINDAS (PACIENTE) -->
+    <!-- TELA DE BOAS VINDAS (PACIENTE) - ALTERADA -->
     <!-- ============================== -->
     <div id="patient-welcome-screen" class="fixed inset-0 z-[100] bg-gradient-to-br from-blue-500 to-indigo-900 hidden flex-col items-center justify-center text-white px-4 transition-opacity duration-700 ease-out no-print">
         <div class="max-w-md w-full bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-2xl shadow-2xl text-center transform transition-all hover:scale-[1.01]">
             <div class="mb-6 inline-flex items-center justify-center w-20 h-20 bg-white rounded-full text-blue-600 shadow-lg">
                 <i class="fa-solid fa-heart-pulse text-4xl"></i>
             </div>
-            <h1 class="text-2xl font-bold mb-4">Olá!</h1>
-            <p class="text-lg opacity-90 mb-6 leading-relaxed font-light">
-                Seja muito bem-vindo(a) à sua jornada de cuidados. Fique à vontade e conte comigo sempre que precisar.
-                <br><br>
-                <strong>Abs, Nutri</strong>
+            <!-- IDs adicionados para injeção dinâmica -->
+            <h1 id="welcome-title" class="text-2xl font-bold mb-4">Olá!</h1>
+            <p id="welcome-message" class="text-lg opacity-90 mb-6 leading-relaxed font-light">
+                <!-- Conteúdo será injetado via JS -->
             </p>
             <button onclick="closePatientWelcome()" class="w-full bg-white text-blue-800 font-bold py-4 rounded-xl shadow-lg hover:bg-blue-50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
                 Visualizar minha dieta <i class="fa-solid fa-arrow-right"></i>
@@ -364,6 +363,11 @@
                 </div>
             </div>
             <div class="flex gap-2">
+                <!-- Botão ANAMNESE Adicionado -->
+                <button onclick="openAnamneseModal()" class="nutritionist-only bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2 border border-teal-400">
+                    <i class="fa-solid fa-clipboard-list"></i> Anamnese
+                </button>
+
                 <button onclick="openPatientModal()" class="nutritionist-only bg-slate-900/30 hover:bg-slate-900/50 text-white px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2 border border-white/20">
                     <i class="fa-solid fa-users"></i> <span id="current-patient-label">Pacientes</span>
                 </button>
@@ -705,13 +709,13 @@
             </div>
             <div class="p-6">
                 <p class="text-sm text-slate-600 mb-4 leading-relaxed">
-                    Nesta seção, você pode salvar o link para envio ao paciente. Vale lembrar que o link é extenso, portanto recomenda-se utilizar sites de encurtamento de links. 
+                    Nesta seção, você pode salvar o link para envio ao paciente após finalizar a dieta. Dessa forma, visualizará a dieta diretamente pela web. Vale lembrar que o link é extenso; portanto, recomenda-se utilizar os sites de encurtamento de links indicados a seguir. 
                     <br><br>
-                    Caso prefira, você também pode salvar o arquivo em PDF para maior comodidade.
+                    Caso prefira, você também pode salvar o arquivo em PDF.
                 </p>
                 
                 <div class="flex gap-3 mb-6">
-                    <a href="https://tinyurl.com/" target="_blank" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold text-center border border-slate-300 transition">
+                    <a href="https://tinyurl.com/" target="_blank" class="flex-1 bg-slate-1 00 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold text-center border border-slate-300 transition">
                         <i class="fa-solid fa-link"></i> TinyURL
                     </a>
                     <a href="https://is.gd/create.php" target="_blank" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold text-center border border-slate-300 transition">
@@ -721,6 +725,27 @@
 
                 <button onclick="generateAndCopyLink()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
                     <i class="fa-regular fa-copy"></i> Copiar Link Gerado
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ANAMNESE (NOVO) -->
+    <div id="anamnese-modal" class="fixed inset-0 modal-overlay z-[70] hidden flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100">
+            <div class="bg-teal-600 p-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-clipboard-list"></i> Anamnese</h3>
+                <button onclick="closeAnamneseModal()" class="text-teal-200 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                    Envie o link a seguir ao paciente para que responda à anamnese. Ao final, solicite o envio do PDF preenchido.
+                </p>
+                <div class="bg-slate-100 p-3 rounded border border-slate-200 mb-4 break-all text-blue-600 font-medium text-sm">
+                    https://romulo-f-monteiro.github.io/anamnese/
+                </div>
+                <button onclick="navigator.clipboard.writeText('https://romulo-f-monteiro.github.io/anamnese/').then(()=>showToast('Link copiado!'))" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                    <i class="fa-regular fa-copy"></i> Copiar Link
                 </button>
             </div>
         </div>
@@ -755,6 +780,10 @@
                  welcome.style.display = 'none';
              }, 700);
         }
+
+        // Funções para Anamnese (Novas)
+        function openAnamneseModal() { document.getElementById('anamnese-modal').classList.remove('hidden'); }
+        function closeAnamneseModal() { document.getElementById('anamnese-modal').classList.add('hidden'); }
 
         // DADOS TACO (Resumido para o exemplo - manter sua lista completa)
         let foodDatabase = [
@@ -948,6 +977,8 @@
 
                     // View Mode UI Adjustments
                     const pName = document.getElementById('patient-name');
+                    const pNameVal = pName ? pName.value : "Paciente";
+                    
                     if(pName) pName.outerHTML = `<h1 class="text-3xl font-black text-slate-800 text-center leading-tight mb-1 break-words">${pName.value}</h1>`;
                     const pGoal = document.getElementById('patient-goal');
                     if(pGoal) pGoal.outerHTML = `<p class="text-lg font-medium text-slate-600 text-center mb-2 break-words">${pGoal.value}</p>`;
@@ -980,6 +1011,14 @@
 
                     initChart();
                     updateChartData();
+
+                    // --- ATUALIZAÇÃO DA MENSAGEM DE BOAS VINDAS (NOVA FUNCIONALIDADE) ---
+                    // Atualiza o texto dinamicamente com o nome do paciente
+                    const welcomeTitle = document.getElementById('welcome-title');
+                    const welcomeMsg = document.getElementById('welcome-message');
+                    if(welcomeTitle) welcomeTitle.innerText = `Olá, ${pNameVal}!`;
+                    if(welcomeMsg) welcomeMsg.innerHTML = `Seja muito bem-vindo(a) à sua jornada de cuidados. Espero que possamos, juntos, alcançar seus objetivos e conte comigo 😊<br><br><strong>Abraços,<br>Nutri</strong>`;
+
 
                     // SHOW WELCOME SCREEN INSTEAD OF CONTENT IMMEDIATELY
                     document.getElementById('patient-welcome-screen').classList.remove('hidden');
@@ -1414,4 +1453,3 @@
     </script>
 </body>
 </html>
-
