@@ -115,7 +115,14 @@
             table { width: 100% !important; table-layout: fixed !important; }
             
             /* Larguras personalizadas quando macros estão ocultos no print */
-            .col-name { width: 60% !important; }
+            .col-name { 
+                width: 60% !important;
+                /* Padding esquerdo aumentado e quebra de texto permitida */
+                padding-left: 20px !important;
+                white-space: normal !important;
+                overflow: visible !important;
+                word-wrap: break-word !important;
+            }
             .col-qty { width: 20% !important; text-align: center !important; } 
             .col-cal { width: 20% !important; text-align: center !important; }
             .col-actions { display: none !important; width: 0 !important; }
@@ -246,9 +253,28 @@
             /* Descola os alimentos da borda esquerda no modo visualização */
             body.view-mode .col-name {
                 padding-left: 2rem !important; 
+                width: auto !important; /* Permite flexibilidade */
             }
             body.view-mode .meal-header {
                 padding-left: 1.5rem !important;
+            }
+            
+            /* NOVOS AJUSTES PARA APROXIMAR QTD E KCAL */
+            body.view-mode table { table-layout: auto !important; } /* Tabela se ajusta ao conteúdo */
+            
+            body.view-mode .col-qty {
+                width: 1px !important; /* Força largura mínima */
+                white-space: nowrap !important;
+                text-align: right !important;
+                padding-right: 4px !important;
+            }
+            
+            body.view-mode .col-cal {
+                width: 1px !important; /* Força largura mínima */
+                white-space: nowrap !important;
+                text-align: left !important;
+                padding-left: 4px !important;
+                padding-right: 24px !important; /* Espaço para não colar na direita */
             }
         }
         
@@ -414,8 +440,8 @@
 
         <main class="flex-grow container mx-auto px-4 py-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- COLUNA DA ESQUERDA (LATERAL) -->
-            <div class="lg:col-span-3 no-print nutritionist-only">
+            <!-- COLUNA DA ESQUERDA (LATERAL) - ALTERADA DE col-span-3 PARA col-span-4 -->
+            <div class="lg:col-span-4 no-print nutritionist-only">
                 <div class="sticky top-4 space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto custom-scroll pr-1 pb-4">
                     <!-- 1. Cor -->
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
@@ -577,8 +603,8 @@
                 </div>
             </div>
 
-            <!-- COLUNA DA DIREITA AUMENTADA -->
-            <div class="lg:col-span-9 space-y-6 w-full">
+            <!-- COLUNA DA DIREITA AUMENTADA - ALTERADA DE col-span-9 PARA col-span-8 -->
+            <div class="lg:col-span-8 space-y-6 w-full">
                 <div id="diet-container" class="space-y-6"></div>
 
                 <!-- Nova Seção de Metas (Metas de Hábito) -->
@@ -605,7 +631,7 @@
 
                 <!-- Seção de Atividade Física -->
                 <div id="activity-section" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-6 break-inside-avoid relative group">
-                     <div class="flex justify-between items-center mb-4">
+                      <div class="flex justify-between items-center mb-4">
                         <h3 class="font-bold text-slate-700 text-lg flex items-center gap-2"><i class="fa-solid fa-person-running theme-text"></i> Atividade Física</h3>
                         <div class="flex gap-2 nutritionist-only">
                              <button onclick="hideSection('activity-section')" class="text-slate-300 hover:text-red-500 px-2 py-1 transition"><i class="fa-solid fa-trash-can"></i></button>
@@ -1043,7 +1069,35 @@
             evolutionChart = new Chart(ctx, {
                 type: 'line',
                 data: { labels: [], datasets: [ { label: 'Peso (kg)', data: [], borderColor: '#059669', backgroundColor: '#059669', tension: 0.3 }, { label: 'Cintura (cm)', data: [], borderColor: '#2563eb', backgroundColor: '#2563eb', tension: 0.3, hidden: true }, { label: 'Abdômen (cm)', data: [], borderColor: '#d97706', backgroundColor: '#d97706', tension: 0.3 }, { label: 'Quadril (cm)', data: [], borderColor: '#7c3aed', backgroundColor: '#7c3aed', tension: 0.3, hidden: true } ] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { position: 'bottom' } 
+                    } 
+                },
+                // PLUGIN PERSONALIZADO PARA EXIBIR VALORES
+                plugins: [{
+                    id: 'floatingLabels',
+                    afterDatasetsDraw(chart, args, options) {
+                        const { ctx } = chart;
+                        chart.data.datasets.forEach((dataset, i) => {
+                            if(chart.isDatasetVisible(i) && dataset.label === 'Peso (kg)') { // Apenas para o peso
+                                const meta = chart.getDatasetMeta(i);
+                                meta.data.forEach((element, index) => {
+                                    const data = dataset.data[index];
+                                    if(data !== null && data !== undefined) {
+                                        ctx.fillStyle = '#64748b'; // Cor Slate-500
+                                        ctx.font = 'bold 10px Inter';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'bottom';
+                                        ctx.fillText(data + 'kg', element.x, element.y - 8);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }]
             });
         }
         function updateChartData() {
@@ -1136,7 +1190,14 @@
                                 <td class="p-3 text-center text-[10px] col-macro cursor-text hover:bg-slate-100 rounded whitespace-nowrap hide-macros" contenteditable="true" onblur="updateFoodMacro(${m.id},${i},'prot',this.innerText)">P: ${f.totalProt.toFixed(0)}</td>
                                 <td class="p-3 text-center text-[10px] col-macro cursor-text hover:bg-slate-100 rounded whitespace-nowrap hide-macros" contenteditable="true" onblur="updateFoodMacro(${m.id},${i},'fat',this.innerText)">G: ${f.totalFat.toFixed(0)}</td>
                                 <td class="p-3 text-center text-[10px] col-macro cursor-text hover:bg-slate-100 rounded whitespace-nowrap hide-macros" contenteditable="true" onblur="updateFoodMacro(${m.id},${i},'fiber',this.innerText)">F: ${(f.totalFiber||0).toFixed(1)}</td>
-                                <td class="p-3 text-center w-28 col-actions no-print nutritionist-only"><div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100"><button onclick="openSubstitutionModal(${m.id},${i})" class="text-indigo-400 px-1"><i class="fa-solid fa-exchange-alt"></i></button><button onclick="removeFood(${m.id},${i})" class="text-red-400 px-1"><i class="fa-solid fa-times"></i></button></div></td>
+                                <td class="p-3 text-center w-28 col-actions no-print nutritionist-only">
+                                    <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100">
+                                        <button onclick="moveFood(${m.id},${i},-1)" class="text-slate-400 hover:text-blue-500 px-1"><i class="fa-solid fa-arrow-up"></i></button>
+                                        <button onclick="moveFood(${m.id},${i},1)" class="text-slate-400 hover:text-blue-500 px-1"><i class="fa-solid fa-arrow-down"></i></button>
+                                        <button onclick="openSubstitutionModal(${m.id},${i})" class="text-indigo-400 px-1"><i class="fa-solid fa-exchange-alt"></i></button>
+                                        <button onclick="removeFood(${m.id},${i})" class="text-red-400 px-1"><i class="fa-solid fa-times"></i></button>
+                                    </div>
+                                </td>
                             </tr>`;
                         });
                         html+=`</tbody></table></div>`;
@@ -1298,7 +1359,7 @@
                                  contenteditable="true" 
                                  placeholder="Descreva a prática atual (ex: 3x semana, 30min)..." 
                                  onblur="updateActivityDesc(${idx}, this.innerText)">${act.desc}</div>
-                            
+                           
                             <div class="flex items-start gap-2 mt-2 pt-2 border-t border-slate-100">
                                 <span class="text-xs font-bold text-emerald-600 uppercase w-24 shrink-0 mt-0.5">Recomendação:</span>
                                 <div class="text-sm font-medium text-slate-700 bg-transparent w-full outline-none whitespace-pre-wrap break-words cursor-text" 
@@ -1400,6 +1461,10 @@
         // Functions below unchanged but re-declared for scope safety in one file
         function updateFoodName(mid, fid, v) { const m=dietMeals.find(x=>x.id===mid); if(m&&m.foods[fid]) { m.foods[fid].name=v.trim(); triggerAutoSave(); } }
         function moveFood(mid, fid, d) { const m=dietMeals.find(x=>x.id===mid); if(!m)return; const ni=fid+d; if(ni>=0 && ni<m.foods.length) { [m.foods[fid], m.foods[ni]] = [m.foods[ni], m.foods[fid]]; renderDiet(); triggerAutoSave(); } }
+        
+        // --- FUNÇÃO ADICIONADA PARA MOVER REFEIÇÕES ---
+        function moveMeal(i, d) { const ni = i + d; if (ni >= 0 && ni < dietMeals.length) { [dietMeals[i], dietMeals[ni]] = [dietMeals[ni], dietMeals[i]]; renderDiet(); triggerAutoSave(); } }
+
         function removeFood(mid, fid) { const m=dietMeals.find(x=>x.id===mid); if(m) { m.foods.splice(fid,1); renderDiet(); triggerAutoSave(); } }
         function removeGoals() { showGoals=false; renderDiet(); }
         function swapMealOptions(mid, o1, o2) { const m=dietMeals.find(x=>x.id===mid); if(!m)return; m.foods.forEach(f=>{ if(f.option===o1)f.option='T'; }); m.foods.forEach(f=>{ if(f.option===o2)f.option=o1; }); m.foods.forEach(f=>{ if(f.option==='T')f.option=o2; }); renderDiet(); triggerAutoSave(); }
