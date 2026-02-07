@@ -7,7 +7,8 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <!-- Adicionando Great Vibes para a assinatura -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Great+Vibes&display=swap" rel="stylesheet">
     <!-- Chart.js para o Gráfico -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- LZ-String para compressão de URL -->
@@ -27,6 +28,11 @@
             -webkit-font-smoothing: antialiased;
         }
         
+        /* Fonte estilo Assinatura */
+        .signature-font {
+            font-family: 'Great Vibes', cursive;
+        }
+
         .theme-bg { background-color: var(--primary) !important; }
         .theme-bg-hover:hover { background-color: var(--primary-hover) !important; }
         .theme-bg-light { background-color: var(--primary-light) !important; }
@@ -47,15 +53,12 @@
             background-color: rgba(0, 0, 0, 0.5);
         }
 
-        /* --- VISIBILIDADE DO LINK DE SUBSTITUIÇÃO --- */
-        /* Padrão: Oculto no modo edição */
+        /* --- VISIBILIDADE DO LINK DE SUBSTITUIÇÃO E RECEITAS --- */
         .patient-footer-link { display: none !important; }
         
-        /* Visível apenas na impressão */
         @media print {
             .patient-footer-link { display: block !important; }
         }
-        /* Visível apenas no modo visualização (link compartilhado) */
         body.view-mode .patient-footer-link { display: block !important; }
 
 
@@ -64,13 +67,11 @@
                 backdrop-filter: none !important;
                 background-color: rgba(255, 255, 255, 0.9) !important;
             }
-            /* Ajuste fino para tabelas no mobile */
             .col-name { width: 40% !important; }
             .col-qty { width: 15% !important; }
             .col-cal { width: 15% !important; }
             .col-macro { width: 30% !important; display: block; }
             
-            /* Tabela de refeições mobile */
             .meal-table-row {
                 display: grid;
                 grid-template-columns: 1fr auto auto;
@@ -94,37 +95,34 @@
 
         /* --- CONFIGURAÇÃO DE IMPRESSÃO --- */
         @media print {
-            @page { margin: 0; size: auto; }
+            @page { margin: 0mm; size: auto; } /* Tenta remover cabeçalhos/rodapés do navegador */
+            
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-shadow: none !important; text-shadow: none !important; }
             body { background-color: white; padding: 10mm 10mm !important; margin: 0 !important; zoom: 0.95; }
             
-            /* Ocultar elementos específicos na impressão */
             .no-print, #toast, #splash-screen, #patient-welcome-screen, .hide-in-print, .nutritionist-only, .hidden-print-section { display: none !important; }
             
-            /* OCULTAR MACROS INDIVIDUAIS NO PDF */
             .col-macro, .meal-table-macros { display: none !important; }
-
-            /* Garantir visibilidade */
             .print-only { display: block !important; }
             .container, #document-area { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; display: block !important; }
             
             main.grid { display: block !important; }
             .lg\:col-span-8, .lg\:col-span-9 { width: 100% !important; }
             
-            /* Ajuste de tabela para não quebrar no print */
             table { width: 100% !important; table-layout: fixed !important; }
             
-            /* Larguras personalizadas quando macros estão ocultos no print */
             .col-name { 
                 width: 60% !important;
-                /* Padding esquerdo aumentado e quebra de texto permitida */
                 padding-left: 20px !important;
                 white-space: normal !important;
                 overflow: visible !important;
                 word-wrap: break-word !important;
             }
-            .col-qty { width: 20% !important; text-align: center !important; } 
-            .col-cal { width: 20% !important; text-align: center !important; }
+            /* Aproximar gramatura no PDF */
+            .col-qty { width: 20% !important; text-align: right !important; padding-right: 2px !important; } 
+            .col-unit { width: 5% !important; text-align: left !important; padding-left: 0 !important; }
+
+            .col-cal { width: 15% !important; text-align: center !important; }
             .col-actions { display: none !important; width: 0 !important; }
             
             .meal-card { break-inside: auto !important; page-break-inside: auto !important; border: 1px solid #ddd; margin-bottom: 20px !important; display: block !important; box-shadow: none !important; border-radius: 8px !important; }
@@ -141,27 +139,25 @@
             #btn-add-row { display: none !important; }
             .col-history-action { display: none !important; width: 0 !important; }
             
-            /* AJUSTE DO GRÁFICO NO PDF (Para não cortar a direita) */
+            /* Ajuste Gráfico PDF */
             #chart-container { 
                 break-inside: avoid; 
                 page-break-inside: avoid; 
-                height: 300px !important; 
-                width: 85% !important; /* Reduzido para 85% para garantir que não corte nas bordas */
+                height: 350px !important; /* Altura fixa */
+                width: 90% !important; 
                 margin: 20px auto !important; 
                 display: block !important;
             }
             #chart-container canvas {
-                max-width: 100% !important;
-                height: auto !important;
+                width: 100% !important;
+                height: 100% !important;
             }
             
             #page-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 30px; text-align: center; font-size: 10px; color: #94a3b8; font-weight: 500; background-color: white; display: flex !important; align-items: center; justify-content: center; border-top: 1px dashed #e2e8f0; z-index: 9999; margin-bottom: 0 !important; padding-bottom: 5px; }
             
-            /* Correção Logo na Impressão */
             #logo-container-wrapper { display: block !important; }
             .upload-ui-controls { display: none !important; }
 
-            /* Estilos para os marcadores de hábito na impressão */
             .habit-check { 
                 border: 1px solid #cbd5e1 !important; 
                 print-color-adjust: exact !important;
@@ -171,14 +167,22 @@
                 background-color: var(--primary) !important;
                 border-color: var(--primary) !important;
             }
+            
+            /* Quebra de linha em metas no PDF */
+            #goals-area, .break-words-print {
+                white-space: pre-wrap !important;
+                word-wrap: break-word !important;
+                overflow-wrap: break-word !important;
+            }
         }
 
         .editable-div {
             min-height: 100px;
             overflow: hidden;
             outline: none;
+            white-space: pre-wrap; /* Garante quebra de linha */
+            word-wrap: break-word;
         }
-        /* Atualizado para funcionar em qualquer campo editável (como nas atividades) */
         [contenteditable]:empty:before {
             content: attr(placeholder);
             color: #94a3b8;
@@ -191,7 +195,6 @@
         .clean-input {
             background: transparent;
             border: none;
-            text-align: center;
             width: 100%;
             outline: none;
         }
@@ -201,7 +204,7 @@
             padding: 8px;
             border: 1px solid #cbd5e1;
             text-align: center;
-            min-width: 80px; /* Garante largura mínima no mobile */
+            min-width: 80px; 
         }
 
         [contenteditable="true"]:hover {
@@ -237,51 +240,54 @@
         /* --- MODO PACIENTE (VIEW MODE) - CSS --- */
         body.view-mode .nutritionist-only { display: none !important; }
         
-        /* OCULTAR MACROS INDIVIDUAIS NO MODO LINK */
         body.view-mode .col-macro { display: none !important; }
         body.view-mode .meal-table-macros { display: none !important; }
         
-        /* Ajuste do layout Desktop no Modo View */
         body.view-mode .lg\:col-span-8, 
         body.view-mode .lg\:col-span-9 { 
             grid-column: span 12 / span 12 !important; 
             width: 100% !important;
         }
         
-        /* AJUSTE DE ESTÉTICA DESKTOP NO LINK COMPARTILHADO */
         @media (min-width: 1024px) {
-            /* Descola os alimentos da borda esquerda no modo visualização */
             body.view-mode .col-name {
                 padding-left: 2rem !important; 
-                width: auto !important; /* Permite flexibilidade */
+                width: auto !important; 
             }
             body.view-mode .meal-header {
                 padding-left: 1.5rem !important;
             }
             
-            /* NOVOS AJUSTES PARA APROXIMAR QTD E KCAL */
-            body.view-mode table { table-layout: auto !important; } /* Tabela se ajusta ao conteúdo */
+            body.view-mode table { table-layout: auto !important; }
             
+            /* Aproximação de Gramatura no Modo Link */
             body.view-mode .col-qty {
-                width: 1px !important; /* Força largura mínima */
+                width: 1px !important;
                 white-space: nowrap !important;
                 text-align: right !important;
-                padding-right: 4px !important;
+                padding-right: 2px !important;
+            }
+            body.view-mode .col-unit {
+                width: 1px !important;
+                text-align: left !important;
+                padding-left: 2px !important;
+                padding-right: 20px !important;
             }
             
             body.view-mode .col-cal {
-                width: 1px !important; /* Força largura mínima */
+                width: 1px !important;
                 white-space: nowrap !important;
                 text-align: left !important;
                 padding-left: 4px !important;
-                padding-right: 24px !important; /* Espaço para não colar na direita */
+                padding-right: 24px !important; 
             }
         }
         
-        /* Container centralizado e limitado no Desktop para não ficar "esticado" demais */
+        /* Ajuste Container Centralizado no Modo View */
         body.view-mode #document-area {
-            max-width: 1024px !important;
+            max-width: 900px !important; /* Reduzido para não parecer encolhido/esticado */
             margin: 0 auto;
+            width: 95%;
         }
 
         body.view-mode [contenteditable] { 
@@ -297,7 +303,7 @@
             background: transparent !important;
             appearance: none;
         }
-        body.view-mode .qty-input { font-weight: bold; border-bottom: none; width: auto; max-width: 50px; }
+        body.view-mode .qty-input { font-weight: bold; border-bottom: none; width: auto; max-width: 50px; text-align: right; }
         body.view-mode .measure-cell { border-color: #e2e8f0; }
         body.view-mode .col-actions { display: none !important; }
         body.view-mode .theme-ring { box-shadow: none !important; }
@@ -309,7 +315,7 @@
             overflow: visible;
         }
 
-        /* Estilos para Metas de Hábito */
+        /* Estilos Metas de Hábito */
         .habit-grid {
             display: grid;
             grid-template-columns: repeat(15, 1fr);
@@ -331,20 +337,43 @@
         .habit-check:hover { transform: scale(1.1); }
         .habit-check.checked { background-color: var(--primary); border-color: var(--primary); }
         
+        /* Estilos de Acordeão para Refeições */
+        .meal-body {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+            overflow: hidden;
+        }
+        .meal-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        .meal-body.expanded {
+            max-height: 2000px; /* Valor arbitrário alto para permitir expansão */
+            opacity: 1;
+        }
+        .chevron-icon {
+            transition: transform 0.3s;
+        }
+        .collapsed .chevron-icon {
+            transform: rotate(-90deg);
+        }
+
+        /* Distinção Visual das Opções */
+        .option-group-A { border-left: 4px solid var(--primary); background-color: #fff; margin-bottom: 8px; border-radius: 4px; }
+        .option-group-B { border-left: 4px solid #3b82f6; background-color: #f8fafc; margin-bottom: 8px; border-radius: 4px; }
+        .option-group-C { border-left: 4px solid #f59e0b; background-color: #fffbeb; margin-bottom: 8px; border-radius: 4px; }
+        
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-    <!-- ============================== -->
-    <!-- TELA INICIAL (SPLASH SCREEN - NUTRICIONISTA) -->
-    <!-- ============================== -->
+    <!-- TELA INICIAL -->
     <div id="splash-screen" class="fixed inset-0 z-[100] bg-gradient-to-br from-emerald-600 to-teal-900 flex flex-col items-center justify-center text-white px-4 transition-opacity duration-700 ease-out no-print">
         <div class="max-w-md w-full bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-2xl shadow-2xl text-center transform transition-all hover:scale-[1.01]">
             <div class="mb-6 inline-flex items-center justify-center w-20 h-20 bg-white rounded-full text-emerald-600 shadow-lg">
                 <i class="fa-solid fa-leaf text-4xl"></i>
             </div>
             <h1 class="text-3xl font-black mb-2 tracking-tight">Sejam bem vindos nutris!</h1>
-            <p class="text-lg opacity-90 mb-6 leading-relaxed font-light">Aproveite o máximo da ferramenta, ela te ajudará além do calculo da dieta.</p>
+            <p class="text-lg opacity-90 mb-6 leading-relaxed font-light">Aproveite o máximo da ferramenta.</p>
             <div class="bg-black/20 rounded-lg p-3 mb-8 inline-block">
                 <p class="text-sm font-medium flex items-center gap-2 justify-center">
                     <span class="opacity-75">Feito por um nutri:</span>
@@ -357,19 +386,14 @@
         </div>
     </div>
 
-    <!-- ============================== -->
-    <!-- TELA DE BOAS VINDAS (PACIENTE) - ALTERADA -->
-    <!-- ============================== -->
+    <!-- TELA DE BOAS VINDAS (PACIENTE) - EMOJI ALTERADO -->
     <div id="patient-welcome-screen" class="fixed inset-0 z-[100] bg-gradient-to-br from-blue-500 to-indigo-900 hidden flex-col items-center justify-center text-white px-4 transition-opacity duration-700 ease-out no-print">
         <div class="max-w-md w-full bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-2xl shadow-2xl text-center transform transition-all hover:scale-[1.01]">
             <div class="mb-6 inline-flex items-center justify-center w-20 h-20 bg-white rounded-full text-blue-600 shadow-lg">
-                <i class="fa-solid fa-heart-pulse text-4xl"></i>
+                <span class="text-4xl">💪</span> <!-- Emoji Alterado -->
             </div>
-            <!-- IDs adicionados para injeção dinâmica -->
             <h1 id="welcome-title" class="text-2xl font-bold mb-4">Olá!</h1>
-            <p id="welcome-message" class="text-lg opacity-90 mb-6 leading-relaxed font-light">
-                <!-- Conteúdo será injetado via JS -->
-            </p>
+            <p id="welcome-message" class="text-lg opacity-90 mb-6 leading-relaxed font-light"></p>
             <button onclick="closePatientWelcome()" class="w-full bg-white text-blue-800 font-bold py-4 rounded-xl shadow-lg hover:bg-blue-50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
                 Visualizar minha dieta <i class="fa-solid fa-arrow-right"></i>
             </button>
@@ -389,11 +413,12 @@
                 </div>
             </div>
             <div class="flex gap-2">
-                <!-- Botão ANAMNESE Adicionado -->
+                <button onclick="openTutorialModal()" class="nutritionist-only bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2 border border-purple-400">
+                    <i class="fa-solid fa-circle-question"></i> Como usar
+                </button>
                 <button onclick="openAnamneseModal()" class="nutritionist-only bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2 border border-teal-400">
                     <i class="fa-solid fa-clipboard-list"></i> Anamnese
                 </button>
-
                 <button onclick="openPatientModal()" class="nutritionist-only bg-slate-900/30 hover:bg-slate-900/50 text-white px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2 border border-white/20">
                     <i class="fa-solid fa-users"></i> <span id="current-patient-label">Pacientes</span>
                 </button>
@@ -424,26 +449,43 @@
                 </div>
 
                 <div class="w-full max-w-2xl space-y-2 flex flex-col items-center">
-                    <div id="patient-name-container" class="w-full">
-                        <input type="text" id="patient-name" class="clean-input text-2xl font-bold text-slate-800 placeholder-slate-300 w-full" placeholder="Nome do Paciente" value="Paciente Exemplo" onkeyup="triggerAutoSave()">
+                    
+                    <!-- Campo Paciente Centralizado -->
+                    <div id="patient-name-container" class="w-full flex items-center gap-2 justify-center">
+                        <span class="text-xl font-semibold text-slate-500 whitespace-nowrap no-print">Paciente:</span>
+                        <input type="text" id="patient-name" class="clean-input text-2xl font-bold text-slate-800 placeholder-slate-300 w-full text-center" placeholder="Nome do Paciente" value="Paciente Exemplo" onkeyup="triggerAutoSave()">
                     </div>
-                    <div id="patient-goal-container" class="w-full">
-                        <input type="text" id="patient-goal" class="clean-input text-md font-medium text-slate-600 placeholder-slate-300 w-full" placeholder="Objetivo" value="Objetivo: Hipertrofia" onkeyup="triggerAutoSave()">
+
+                    <!-- Objetivo Centralizado -->
+                    <div id="patient-goal-container" class="w-full text-center">
+                        <input type="text" id="patient-goal" class="clean-input text-md font-medium text-slate-600 placeholder-slate-300 w-full text-center" placeholder="Objetivo" value="Objetivo: Hipertrofia" onkeyup="triggerAutoSave()">
                     </div>
-                    <div class="relative w-full">
-                        <input type="date" id="diet-date" class="clean-input text-sm text-slate-500 font-medium no-print w-full" onchange="updateDateDisplay(); triggerAutoSave();">
+                    
+                    <!-- Data Centralizada -->
+                    <div class="relative w-full text-center">
+                        <input type="date" id="diet-date" class="clean-input text-sm text-slate-500 font-medium no-print w-full text-center" onchange="updateDateDisplay(); triggerAutoSave();">
                         <span id="date-display" class="hidden print-only text-sm text-slate-500 font-medium w-full text-center block"></span>
                     </div>
+
+                    <!-- Assinatura Abaixo da Data -->
+                    <div class="w-full mt-4 text-center nutri-header-group">
+                        <!-- Rótulo sem dois pontos -->
+                        <p class="text-sm font-semibold text-slate-500 mb-0">Nutricionista</p>
+                        <!-- Tamanho da fonte reduzido para text-2xl -->
+                        <input type="text" id="header-prof-name-input" class="clean-input signature-font text-2xl text-black placeholder-slate-200 w-full text-center" placeholder="Assine aqui..." onkeyup="triggerAutoSave()">
+                    </div>
+
                 </div>
             </div>
         </div>
 
         <main class="flex-grow container mx-auto px-4 py-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- COLUNA DA ESQUERDA (LATERAL) - ALTERADA DE col-span-3 PARA col-span-4 -->
+            <!-- COLUNA DA ESQUERDA -->
             <div class="lg:col-span-4 no-print nutritionist-only">
                 <div class="sticky top-4 space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto custom-scroll pr-1 pb-4">
-                    <!-- 1. Cor -->
+                    <!-- Painéis de Controle (Cores, Calc, Metas, Add Alimento...) Mantidos iguais -->
+                     <!-- 1. Cor -->
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                         <h3 class="text-xs font-bold text-slate-500 uppercase mb-3">Personalizar Cor</h3>
                         <div class="grid grid-cols-5 gap-3">
@@ -464,7 +506,7 @@
                     <div id="nutritionist-calculator" class="bg-slate-800 text-white p-5 rounded-xl shadow-lg border border-slate-700 relative overflow-hidden">
                         <div class="absolute top-0 right-0 p-2 opacity-10"><i class="fa-solid fa-calculator text-6xl"></i></div>
                         <h2 class="font-bold text-lg mb-4 flex items-center gap-2 relative z-10">Área do Nutricionista</h2>
-                        <div class="space-y-3 relative z-10 text-sm">
+                         <div class="space-y-3 relative z-10 text-sm">
                             <div class="flex gap-2 bg-slate-700/50 p-1 rounded-lg">
                                 <label class="flex-1 text-center cursor-pointer">
                                     <input type="radio" name="calc-sex" value="m" checked class="peer sr-only" onchange="calculateEnergy(); triggerAutoSave();">
@@ -480,7 +522,7 @@
                                 <div><label class="text-[10px] text-slate-400 uppercase">Altura (cm)</label><input type="number" id="calc-height" class="w-full bg-slate-700 border border-slate-600 rounded p-1.5 text-white text-center outline-none" placeholder="0" onkeyup="calculateEnergy(); triggerAutoSave();"></div>
                                 <div><label class="text-[10px] text-slate-400 uppercase">Idade</label><input type="number" id="calc-age" class="w-full bg-slate-700 border border-slate-600 rounded p-1.5 text-white text-center outline-none" placeholder="0" onkeyup="calculateEnergy(); triggerAutoSave();"></div>
                             </div>
-                            <div>
+                             <div>
                                 <label class="text-[10px] text-slate-400 uppercase">Fórmula TMB</label>
                                 <select id="calc-formula" class="w-full bg-slate-700 border border-slate-600 rounded p-1.5 text-white text-xs outline-none" onchange="toggleBodyFatInput(); calculateEnergy(); triggerAutoSave();">
                                     <option value="mifflin" selected>Mifflin-St Jeor (Padrão)</option>
@@ -572,8 +614,8 @@
                             <button onclick="addNewMeal(); triggerAutoSave();" class="bg-slate-800 text-white px-4 rounded-lg hover:bg-slate-700 transition"><i class="fa-solid fa-plus"></i></button>
                         </div>
                     </div>
-
-                    <!-- 6. Custom Foods -->
+                    
+                    <!-- 6. Custom Foods (RESTAURADO) -->
                     <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 nutrition-only">
                         <h2 class="font-semibold text-lg mb-4 flex items-center gap-2 text-slate-700 cursor-pointer" onclick="toggleCustomForm()">
                             <i class="fa-solid fa-pen-to-square text-blue-500"></i> Adicionar Novos Alimentos
@@ -603,7 +645,7 @@
                 </div>
             </div>
 
-            <!-- COLUNA DA DIREITA AUMENTADA - ALTERADA DE col-span-9 PARA col-span-8 -->
+            <!-- COLUNA DA DIREITA -->
             <div class="lg:col-span-8 space-y-6 w-full">
                 <div id="diet-container" class="space-y-6"></div>
 
@@ -616,17 +658,14 @@
                             <button onclick="hideSection('habit-goals-section')" class="nutritionist-only bg-white text-slate-300 hover:text-red-500 px-2 py-1 rounded text-xs transition border border-transparent hover:border-red-100"><i class="fa-solid fa-trash-can"></i> Excluir seção</button>
                         </div>
                     </div>
-                    
-                    <div id="habit-goals-container" class="space-y-4">
-                        <!-- Metas inseridas aqui dinamicamente -->
-                    </div>
+                    <div id="habit-goals-container" class="space-y-4"></div>
                 </div>
 
-                <!-- Metas (Texto Livre) -->
+                <!-- Metas (Texto Livre) - Justificado e com quebra de linha -->
                 <div id="goals-card" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-8 break-inside-avoid relative group">
                     <button onclick="hideSection('goals-card')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition no-print nutritionist-only opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash-can"></i></button>
-                    <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2 text-lg"><i class="fa-solid fa-bullseye theme-text"></i> Orientações e Recomendações</h3>
-                    <div id="goals-area" class="editable-div w-full p-2 bg-transparent text-slate-700 leading-relaxed" contenteditable="true" placeholder="Digite aqui..." onblur="triggerAutoSave()"></div>
+                    <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2 text-lg justify-center"><i class="fa-solid fa-bullseye theme-text"></i> Orientações e Recomendações</h3>
+                    <div id="goals-area" class="editable-div w-full p-2 bg-transparent text-slate-700 leading-relaxed text-justify break-words" contenteditable="true" placeholder="Digite aqui..." onblur="triggerAutoSave()"></div>
                 </div>
 
                 <!-- Seção de Atividade Física -->
@@ -637,13 +676,10 @@
                              <button onclick="hideSection('activity-section')" class="text-slate-300 hover:text-red-500 px-2 py-1 transition"><i class="fa-solid fa-trash-can"></i></button>
                         </div>
                     </div>
-                    
                     <div id="activity-list" class="space-y-4 mb-6"></div>
-                    
                     <div class="flex justify-center mb-6 nutritionist-only">
                         <button onclick="addActivityRow()" class="bg-slate-50 hover:bg-slate-100 text-slate-600 px-3 py-1 rounded text-xs font-bold transition border border-slate-200"><i class="fa-solid fa-plus"></i> Adicionar nova atividade</button>
                     </div>
-
                     <div class="text-[10px] text-slate-400 text-center italic mt-4 border-t border-slate-100 pt-3">
                         “Consulte um profissional antes de iniciar ou alterar sua rotina de exercícios, pois as informações apresentadas não substituem acompanhamento especializado.”
                     </div>
@@ -653,8 +689,8 @@
                 <div id="history-card" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-6 break-inside-avoid w-full overflow-hidden relative group">
                     <button onclick="hideSection('history-card')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500 transition no-print nutritionist-only opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash-can"></i></button>
                     <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2 text-lg"><i class="fa-solid fa-weight-scale theme-text"></i> Histórico da composição corporal</h3>
-                    <div class="w-full overflow-x-auto"> <!-- Fix: Scroll horizontal no mobile -->
-                        <table id="history-table" class="w-full text-xs text-center border-collapse border border-slate-300 min-w-[600px]"> <!-- Fix: Min width forçar scroll -->
+                    <div class="w-full overflow-x-auto">
+                        <table id="history-table" class="w-full text-xs text-center border-collapse border border-slate-300 min-w-[600px]">
                             <thead>
                                 <tr class="bg-slate-100 text-slate-700 font-bold">
                                     <th class="measure-cell">Data</th>
@@ -673,7 +709,7 @@
                     <div class="mt-2 text-right nutritionist-only">
                          <button id="btn-add-row" onclick="addHistoryRow()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1 rounded text-xs font-bold transition border border-slate-300 hide-in-print"><i class="fa-solid fa-plus"></i> Adicionar Linha</button>
                     </div>
-                    <div id="chart-container" class="mt-6 h-96 w-full"> <!-- Aumentado para 384px (h-96) -->
+                    <div id="chart-container" class="mt-6 h-96 w-full"> 
                         <canvas id="evolutionChart"></canvas>
                     </div>
                 </div>
@@ -704,12 +740,31 @@
         </main>
     </div>
 
-    <!-- RODAPÉ FIXO DE IMPRESSÃO -->
+    <!-- RODAPÉ FIXO DE IMPRESSÃO (Sem URL) -->
     <div id="page-footer" class="hidden print-only">RFM - Plano Alimentar - Dietas personalizadas</div>
 
-    <!-- MODAL SUBSTITUIÇÃO -->
+    <!-- MODAIS (Substituição, Compartilhar, Anamnese, Pacientes) Mantidos -->
+    
+    <!-- Modal Tutorial -->
+    <div id="tutorial-modal" class="fixed inset-0 modal-overlay z-[80] hidden flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden transform transition-all scale-100">
+            <div class="bg-purple-600 p-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-circle-play"></i> Como Usar a Ferramenta</h3>
+                <button onclick="closeTutorialModal()" class="text-purple-200 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="aspect-video bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400">
+                    <i class="fa-brands fa-youtube text-5xl mb-3 text-slate-300"></i>
+                    <p class="font-medium">O vídeo explicativo será adicionado aqui.</p>
+                    <p class="text-xs mt-1">Cole o link/iframe do YouTube no código HTML futuramente.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="substitution-modal" class="fixed inset-0 modal-overlay z-[60] hidden flex items-center justify-center backdrop-blur-sm p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh]">
+        <!-- Conteúdo do Modal Mantido -->
+         <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[85vh]">
             <div class="bg-indigo-600 p-4 text-white flex justify-between items-center"><h3 class="font-bold text-lg"><i class="fa-solid fa-exchange-alt"></i> Encontrar Substituto</h3><button onclick="closeSubModal()" class="text-indigo-200 hover:text-white"><i class="fa-solid fa-times"></i></button></div>
             <div class="p-4 bg-indigo-50 border-b border-indigo-100">
                 <div id="sub-source-info" class="text-sm text-indigo-900 mb-3 font-medium"></div>
@@ -726,7 +781,7 @@
         </div>
     </div>
 
-    <!-- MODAL INFORMATIVO DE COMPARTILHAMENTO -->
+    <!-- ... Outros modais (Share, Anamnese, Patients) são mantidos, apenas lógica JS ajustada onde necessário ... -->
     <div id="share-info-modal" class="fixed inset-0 modal-overlay z-[70] hidden flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100">
             <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
@@ -735,49 +790,31 @@
             </div>
             <div class="p-6">
                 <p class="text-sm text-slate-600 mb-4 leading-relaxed">
-                    Nesta seção, você pode salvar o link para envio ao paciente após finalizar a dieta. Dessa forma, visualizará a dieta diretamente pela web. Vale lembrar que o link é extenso; portanto, recomenda-se utilizar os sites de encurtamento de links indicados a seguir. 
-                    <br><br>
-                    Caso prefira, você também pode salvar o arquivo em PDF.
+                    Nesta seção, você pode salvar o link para envio ao paciente. Use encurtadores se preferir.
                 </p>
-                
                 <div class="flex gap-3 mb-6">
-                    <a href="https://tinyurl.com/" target="_blank" class="flex-1 bg-slate-1 00 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold text-center border border-slate-300 transition">
-                        <i class="fa-solid fa-link"></i> TinyURL
-                    </a>
-                    <a href="https://is.gd/create.php" target="_blank" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold text-center border border-slate-300 transition">
-                        <i class="fa-solid fa-link"></i> is.gd
-                    </a>
+                    <a href="https://tinyurl.com/" target="_blank" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold text-center border border-slate-300 transition"><i class="fa-solid fa-link"></i> TinyURL</a>
+                    <a href="https://is.gd/create.php" target="_blank" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded-lg text-xs font-bold text-center border border-slate-300 transition"><i class="fa-solid fa-link"></i> is.gd</a>
                 </div>
-
                 <button onclick="generateAndCopyLink()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
                     <i class="fa-regular fa-copy"></i> Copiar Link Gerado
                 </button>
             </div>
         </div>
     </div>
-
-    <!-- MODAL ANAMNESE (NOVO) -->
-    <div id="anamnese-modal" class="fixed inset-0 modal-overlay z-[70] hidden flex items-center justify-center backdrop-blur-sm p-4">
+     <div id="anamnese-modal" class="fixed inset-0 modal-overlay z-[70] hidden flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-100">
             <div class="bg-teal-600 p-4 text-white flex justify-between items-center">
                 <h3 class="font-bold text-lg"><i class="fa-solid fa-clipboard-list"></i> Anamnese</h3>
                 <button onclick="closeAnamneseModal()" class="text-teal-200 hover:text-white"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="p-6">
-                <p class="text-sm text-slate-600 mb-4 leading-relaxed">
-                    Envie o link a seguir ao paciente para que responda à anamnese. Ao final, solicite o envio do PDF preenchido.
-                </p>
-                <div class="bg-slate-100 p-3 rounded border border-slate-200 mb-4 break-all text-blue-600 font-medium text-sm">
-                    https://romulo-f-monteiro.github.io/anamnese/
-                </div>
-                <button onclick="navigator.clipboard.writeText('https://romulo-f-monteiro.github.io/anamnese/').then(()=>showToast('Link copiado!'))" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-                    <i class="fa-regular fa-copy"></i> Copiar Link
-                </button>
+                <p class="text-sm text-slate-600 mb-4 leading-relaxed">Envie o link a seguir ao paciente.</p>
+                <div class="bg-slate-100 p-3 rounded border border-slate-200 mb-4 break-all text-blue-600 font-medium text-sm">https://romulo-f-monteiro.github.io/anamnese/</div>
+                <button onclick="navigator.clipboard.writeText('https://romulo-f-monteiro.github.io/anamnese/').then(()=>showToast('Link copiado!'))" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center gap-2"><i class="fa-regular fa-copy"></i> Copiar Link</button>
             </div>
         </div>
     </div>
-
-    <!-- MODAL PACIENTES -->
     <div id="patient-modal" class="fixed inset-0 modal-overlay z-50 hidden flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
             <div class="bg-slate-800 p-4 text-white flex justify-between items-center"><h3 class="font-bold text-lg"><i class="fa-solid fa-users"></i> Gerenciar Pacientes</h3><button onclick="closePatientModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button></div>
@@ -807,11 +844,14 @@
              }, 700);
         }
 
-        // Funções para Anamnese (Novas)
         function openAnamneseModal() { document.getElementById('anamnese-modal').classList.remove('hidden'); }
         function closeAnamneseModal() { document.getElementById('anamnese-modal').classList.add('hidden'); }
+        
+        // --- FUNÇÕES DO MODAL TUTORIAL ---
+        function openTutorialModal() { document.getElementById('tutorial-modal').classList.remove('hidden'); }
+        function closeTutorialModal() { document.getElementById('tutorial-modal').classList.add('hidden'); }
 
-        // DADOS TACO (Resumido para o exemplo - manter sua lista completa)
+        // DADOS TACO
         let foodDatabase = [
             { id: 101, name: "Arroz Integral, Cozido", cal: 124, carb: 25.8, prot: 2.6, fat: 1.0, fiber: 2.7 },
             { id: 102, name: "Arroz Tipo 1, Cozido", cal: 128, carb: 28.1, prot: 2.5, fat: 0.2, fiber: 1.6 },
@@ -823,10 +863,7 @@
             { id: 418, name: "Ovo de Galinha, Cozido", cal: 146, carb: 0.6, prot: 13.3, fat: 9.5, fiber: 0 },
             { id: 129, name: "Pão Francês", cal: 300, carb: 58.6, prot: 8.0, fat: 3.1, fiber: 2.3 },
             { id: 511, name: "Manteiga, Com Sal", cal: 726, carb: 0.1, prot: 0.4, fat: 82.0, fiber: 0 }
-            // Adicione aqui o restante se necessário, estou usando uma base segura.
         ];
-        // RECARREGAR A LISTA COMPLETA DO SEU ARQUIVO ANTERIOR PARA NÃO PERDER DADOS
-        // (Assumindo que você copiará a lista completa para cá se precisar de mais itens)
 
         const defaultMeals = [
             { id: 1, title: "Café da Manhã (Desjejum)", foods: [], observation: "" },
@@ -839,13 +876,12 @@
         
         const defaultActivities = [
              { id: 1, name: "Caminhada - Atual", desc: "Leve, 3x semana, 30min", rec: "Aumentar para 45min" },
-             { id: 2, name: "Musculação - Atual", desc: "4x semana, foco hipertrofia", rec: "Manter intensidade" },
-             { id: 3, name: "Deslocamento Ativo - Atual", desc: "Ir a pé para o trabalho", rec: "" }
+             { id: 2, name: "Musculação - Atual", desc: "4x semana, foco hipertrofia", rec: "Manter intensidade" }
         ];
 
         let dietMeals = JSON.parse(JSON.stringify(defaultMeals));
-        let customGoals = []; // ARRAY PARA AS NOVAS METAS
-        let physicalActivities = JSON.parse(JSON.stringify(defaultActivities)); // Array para Atividades
+        let customGoals = []; 
+        let physicalActivities = JSON.parse(JSON.stringify(defaultActivities)); 
         let currentTheme = 'emerald';
         let showGoals = true;
         let currentPatientId = null;
@@ -854,8 +890,6 @@
 
         const themes = { emerald: { primary: '#059669', hover: '#047857', light: '#ecfdf5', text: '#065f46', border: '#d1fae5' }, blue: { primary: '#2563eb', hover: '#1d4ed8', light: '#eff6ff', text: '#1e40af', border: '#dbeafe' }, indigo: { primary: '#4f46e5', hover: '#4338ca', light: '#eef2ff', text: '#3730a3', border: '#e0e7ff' }, rose: { primary: '#e11d48', hover: '#be123c', light: '#fff1f2', text: '#9f1239', border: '#ffe4e6' }, amber: { primary: '#d97706', hover: '#b45309', light: '#fffbeb', text: '#92400e', border: '#fef3c7' }, purple: { primary: '#9333ea', hover: '#7e22ce', light: '#f3e8ff', text: '#6b21a8', border: '#e9d5ff' }, cyan: { primary: '#06b6d4', hover: '#0891b2', light: '#ecfeff', text: '#155e75', border: '#cffafe' }, teal: { primary: '#14b8a6', hover: '#0d9488', light: '#f0fdfa', text: '#115e59', border: '#ccfbf1' }, lime: { primary: '#84cc16', hover: '#65a30d', light: '#f7fee7', text: '#3f6212', border: '#d9f99d' }, fuchsia: { primary: '#d946ef', hover: '#c026d3', light: '#fdf4ff', text: '#86198f', border: '#f0abfc' } };
         const emojiList = ["☕", "🥛", "🧃", "🍵", "🧉", "🥤", "🥣", "🍽️", "🥡", "🥢", "🍴", "🥄", "🍞", "🥯", "🥐", "🥖", "🥪", "🥨", "🥞", "🧇", "🥚", "🍳", "🧈", "🧀", "🍎", "🍌", "🍇", "🍓", "🫐", "🥝", "🥑", "🍍", "🥭", "🍑", "🍒", "🍈", "🍉", "🍊", "🍋", "🥗", "🥬", "🥦", "🥒", "🍅", "🥕", "🌽", "🥔", "🧅", "🧄", "🍠", "🥩", "🍗", "🍖", "🥓", "🍔", "🌭", "🥪", "🌮", "🌯", "🥙", "🐟", "🍣", "🍤", "🦞", "🦀", "🦑", "🐙", "🍚", "🍝", "🍜", "🍲", "🍛", "🍱", "🥟", "🍙", "🍘", "🍫", "🍪", "🥜", "🍯", "🍮", "🧁", "🍰", "🍩", "🍦", "🍧", "🍨", "💊", "🧴", "🏋️", "💪", "⚡", "🔋"];
-        
-        // Ícones específicos para as metas de hábito
         const habitIcons = ["💧", "🌙", "🌱", "💊", "📖", "🧘", "🚶", "📵", "🚭", "🥗", "🏋️", "🍎", "🏃", "🚫🍺", "🏊", "🚲", "🥪", "🍕"];
 
         function init() {
@@ -871,15 +905,10 @@
             renderActivities();
         }
 
-        // ========================
-        // === COMPARTILHAMENTO ===
-        // ========================
-        
         function updateInitials() {
             const name = document.getElementById('prof-name').value || "RFM";
             const parts = name.trim().split(" ");
             let initials = "";
-            // Lógica Atualizada: Pegar 1ª letra das 3 primeiras partes do nome
             if (parts.length === 1) {
                 initials = parts[0].substring(0, 3);
             } else {
@@ -890,87 +919,88 @@
             document.getElementById('header-initials').innerText = initials.toUpperCase() || "RFM";
         }
 
-        // Minify: Remove calculated totals to save space
+        // Minify com limpeza extra para reduzir link
         function minifyData(meals) {
-            return meals.map(m => ({
-                id: m.id,
-                title: m.title,
-                observation: m.observation,
-                foods: m.foods.map(f => ({
-                    id: f.id,
-                    name: f.name,
-                    qty: f.qty,
-                    option: f.option,
-                    // Store only base values if custom, else we can lookup from DB
-                    // For safety we keep base values but strip TOTALS
-                    cal: f.cal, carb: f.carb, prot: f.prot, fat: f.fat, fiber: f.fiber
-                }))
-            }));
+            return meals.map(m => {
+                const cleanFoods = m.foods.map(f => ({ id: f.id, name: f.name, qty: f.qty, option: f.option, cal: f.cal, carb: f.carb, prot: f.prot, fat: f.fat, fiber: f.fiber }));
+                // Se a refeição não tem comida e não tem obs, ignoramos (opcional, mas arriscado se o user quiser refeições vazias)
+                // Vamos manter, mas limpar a obs se vazia
+                const cleanObs = m.observation ? m.observation : undefined;
+                return { id: m.id, title: m.title, ...(cleanObs && {observation: cleanObs}), foods: cleanFoods };
+            });
         }
 
         function restoreTotals(meals) {
             meals.forEach(m => {
                 m.foods.forEach(f => {
                     const fac = f.qty / 100;
-                    f.totalCal = f.cal * fac;
-                    f.totalCarb = f.carb * fac;
-                    f.totalProt = f.prot * fac;
-                    f.totalFat = f.fat * fac;
-                    f.totalFiber = (f.fiber||0) * fac;
+                    f.totalCal = f.cal * fac; f.totalCarb = f.carb * fac; f.totalProt = f.prot * fac; f.totalFat = f.fat * fac; f.totalFiber = (f.fiber||0) * fac;
                 });
             });
             return meals;
         }
 
-        // Funções do Modal de Compartilhamento
-        function openShareModal() {
-            document.getElementById('share-info-modal').classList.remove('hidden');
-        }
-        
-        function closeShareModal() {
-            document.getElementById('share-info-modal').classList.add('hidden');
-        }
+        function openShareModal() { document.getElementById('share-info-modal').classList.remove('hidden'); }
+        function closeShareModal() { document.getElementById('share-info-modal').classList.add('hidden'); }
 
         function generateAndCopyLink() {
             const inputs = {};
-            ['patient-name','patient-goal','diet-date','prof-name','prof-crn','prof-phone','prof-insta','target-cal','target-carb-pct','target-prot-pct','target-fat-pct', 'target-fiber'].forEach(f => inputs[f] = document.getElementById(f).value);
+            // Apenas inputs essenciais e não vazios
+            ['patient-name','patient-goal','diet-date','prof-name','header-prof-name-input','prof-crn','prof-phone','prof-insta','target-cal','target-carb-pct','target-prot-pct','target-fat-pct', 'target-fiber'].forEach(f => {
+                const el = document.getElementById(f);
+                if(el && el.value) inputs[f] = el.value;
+            });
 
             const history = [];
             document.querySelectorAll('#history-table tbody tr').forEach(r => {
                 const row = []; 
-                r.querySelectorAll('td.measure-cell').forEach(c => row.push(c.innerText)); 
-                if(row.length > 0) history.push(row);
+                let hasData = false;
+                r.querySelectorAll('td.measure-cell').forEach(c => {
+                    const txt = c.innerText.trim();
+                    row.push(txt);
+                    if(txt) hasData = true;
+                }); 
+                if(hasData) history.push(row);
             });
 
-            // Otimização: Minificar refeições
             const minifiedMeals = minifyData(dietMeals);
             
-            // Verificar seções ocultas
+            // Limpa metas vazias
+            const cleanGoals = customGoals.filter(g => g.title).map(g => ({
+                t: g.title, i: g.icon, d: g.days.map(d => d ? 1 : 0).join('') // Bitmask string for days to save space
+            }));
+
+            // Limpa atividades vazias
+            const cleanActivities = physicalActivities.filter(a => a.name).map(a => ({
+                n: a.name, d: a.desc, r: a.rec
+            }));
+
             const hiddenSections = [];
-            if(document.getElementById('habit-goals-section').classList.contains('hidden')) hiddenSections.push('habit-goals-section');
-            if(document.getElementById('activity-section').classList.contains('hidden')) hiddenSections.push('activity-section');
-            if(document.getElementById('goals-card').classList.contains('hidden')) hiddenSections.push('goals-card');
+            if(document.getElementById('habit-goals-section').classList.contains('hidden')) hiddenSections.push('h');
+            if(document.getElementById('activity-section').classList.contains('hidden')) hiddenSections.push('a');
+            if(document.getElementById('goals-card').classList.contains('hidden')) hiddenSections.push('g');
 
+            const shareData = { 
+                v: 3, // Version 3 optimized
+                i: inputs, 
+                m: minifiedMeals, 
+                h: history, 
+                t: currentTheme, 
+                g: document.getElementById('goals-area').innerText, 
+                cg: cleanGoals, 
+                pa: cleanActivities, 
+                hs: hiddenSections 
+            };
 
-            // Adicionando customGoals ao shareData
-            const shareData = { v: 2, i: inputs, m: minifiedMeals, h: history, t: currentTheme, g: document.getElementById('goals-area').innerText, cg: customGoals, pa: physicalActivities, hs: hiddenSections };
             const jsonStr = JSON.stringify(shareData);
             const compressed = LZString.compressToEncodedURIComponent(jsonStr);
             const patientName = document.getElementById('patient-name').value.trim();
             const safeName = encodeURIComponent(patientName).replace(/%20/g, '+');
             const url = window.location.href.split('?')[0] + '?nome=' + safeName + '&d=' + compressed;
 
-            navigator.clipboard.writeText(url).then(() => {
-                showToast("Link copiado para área de transferência!", "success");
-                closeShareModal();
-            }).catch(err => prompt("Copie:", url));
+            navigator.clipboard.writeText(url).then(() => { showToast("Link copiado!", "success"); closeShareModal(); }).catch(err => prompt("Copie:", url));
         }
         
-        // Mantém função antiga para compatibilidade se chamada diretamente, mas redireciona para modal
-        function shareLink() {
-            openShareModal();
-        }
-
         function checkShareMode() {
             const urlParams = new URLSearchParams(window.location.search);
             const data = urlParams.get('d');
@@ -981,38 +1011,81 @@
                     if (!jsonStr) throw new Error("Dados inválidos");
 
                     const c = JSON.parse(jsonStr);
-                    // Suporte para versão v1 (antiga) e v2 (nova minificada)
-                    if(c.v === 2) {
+                    
+                    // V3 Loading Logic (Optimized)
+                    if(c.v === 3) {
                         dietMeals = restoreTotals(c.m || []);
                         currentTheme = c.t || 'emerald';
                         if(c.i) for(const [k, v] of Object.entries(c.i)) { const el=document.getElementById(k); if(el) el.value=v; }
                         if(c.g) document.getElementById('goals-area').innerText = c.g;
-                        customGoals = c.cg || []; // Carrega as metas de hábito
-                        physicalActivities = c.pa || []; // Carrega atividades
-                        if(c.hs) c.hs.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('hidden'); });
+                        
+                        // Restore Goals
+                        customGoals = (c.cg || []).map(g => ({
+                            title: g.t, icon: g.i, 
+                            days: g.d.split('').map(x => x === '1')
+                        }));
+                        
+                        // Restore Activities
+                        physicalActivities = (c.pa || []).map(a => ({
+                            id: Date.now() + Math.random(), name: a.n, desc: a.d, rec: a.r
+                        }));
 
+                        if(c.hs) {
+                            if(c.hs.includes('h')) document.getElementById('habit-goals-section').classList.add('hidden');
+                            if(c.hs.includes('a')) document.getElementById('activity-section').classList.add('hidden');
+                            if(c.hs.includes('g')) document.getElementById('goals-card').classList.add('hidden');
+                        }
+
+                    } else if(c.v === 2) {
+                        // V2 Logic
+                        dietMeals = restoreTotals(c.m || []);
+                        currentTheme = c.t || 'emerald';
+                        if(c.i) for(const [k, v] of Object.entries(c.i)) { const el=document.getElementById(k); if(el) el.value=v; }
+                        if(c.g) document.getElementById('goals-area').innerText = c.g;
+                        customGoals = c.cg || []; 
+                        physicalActivities = c.pa || []; 
+                        if(c.hs) c.hs.forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('hidden'); });
                     } else {
-                        // Legacy support
+                        // Legacy
                         dietMeals = c.meals || [];
                         currentTheme = c.theme || 'emerald';
                         if(c.inputs) for(const [k, v] of Object.entries(c.inputs)) { const el=document.getElementById(k); if(el) el.value=v; }
                         if(c.goalsText) document.getElementById('goals-area').innerText = c.goalsText;
-                        customGoals = [];
-                        physicalActivities = [];
+                        customGoals = []; physicalActivities = [];
                     }
 
-                    // View Mode UI Adjustments
                     const pName = document.getElementById('patient-name');
                     const pNameVal = pName ? pName.value : "Paciente";
                     
-                    if(pName) pName.outerHTML = `<h1 class="text-3xl font-black text-slate-800 text-center leading-tight mb-1 break-words">${pName.value}</h1>`;
+                    // Substitui o input do nome por H1 estático centralizado (Removido prefixo "Paciente:")
+                    if(pName) pName.closest('div').outerHTML = `<h1 class="text-3xl font-black text-slate-800 text-center leading-tight mb-1 break-words">${pNameVal}</h1>`;
+                    
+                    // Header Signature View
+                    const pHeaderNameInput = document.getElementById('header-prof-name-input');
+                    if(pHeaderNameInput && pHeaderNameInput.value) {
+                         // Create the signature div for view mode
+                         const sigDiv = document.createElement('div');
+                         // Mantém text-2xl como solicitado
+                         sigDiv.className = "signature-font text-2xl text-black text-center mt-2";
+                         sigDiv.innerText = pHeaderNameInput.value;
+                         
+                         const container = pHeaderNameInput.closest('.nutri-header-group');
+                         if(container) {
+                            pHeaderNameInput.replaceWith(sigDiv);
+                         }
+                    } else {
+                        // If empty, remove the section in view mode
+                        if(pHeaderNameInput) pHeaderNameInput.closest('.nutri-header-group').remove();
+                    }
+
                     const pGoal = document.getElementById('patient-goal');
+                    // Garante centralização do objetivo
                     if(pGoal) pGoal.outerHTML = `<p class="text-lg font-medium text-slate-600 text-center mb-2 break-words">${pGoal.value}</p>`;
                     
                     setTheme(currentTheme);
                     renderDiet();
-                    renderCustomGoals(); // Renderiza as metas no modo view
-                    renderActivities(); // Renderiza atividades
+                    renderCustomGoals();
+                    renderActivities(); 
                     updateDateDisplay();
                     updateInitials();
 
@@ -1024,13 +1097,10 @@
                             const tr = document.createElement('tr');
                             r.forEach(cellText => {
                                 const td = document.createElement('td');
-                                td.className = "measure-cell";
-                                td.innerText = cellText; 
+                                td.className = "measure-cell"; td.innerText = cellText; 
                                 tr.appendChild(td);
                             });
-                            const tdAction = document.createElement('td');
-                            tdAction.className = "nutritionist-only";
-                            tr.appendChild(tdAction);
+                            const tdAction = document.createElement('td'); tdAction.className = "nutritionist-only"; tr.appendChild(tdAction);
                             tbody.appendChild(tr);
                         });
                     }
@@ -1038,15 +1108,11 @@
                     initChart();
                     updateChartData();
 
-                    // --- ATUALIZAÇÃO DA MENSAGEM DE BOAS VINDAS (NOVA FUNCIONALIDADE) ---
-                    // Atualiza o texto dinamicamente com o nome do paciente
                     const welcomeTitle = document.getElementById('welcome-title');
                     const welcomeMsg = document.getElementById('welcome-message');
                     if(welcomeTitle) welcomeTitle.innerText = `Olá, ${pNameVal}!`;
                     if(welcomeMsg) welcomeMsg.innerHTML = `Seja muito bem-vindo(a) à sua jornada de cuidados. Espero que possamos, juntos, alcançar seus objetivos e conte comigo 😊<br><br><strong>Abraços,<br>Nutri</strong>`;
 
-
-                    // SHOW WELCOME SCREEN INSTEAD OF CONTENT IMMEDIATELY
                     document.getElementById('patient-welcome-screen').classList.remove('hidden');
                     document.getElementById('patient-welcome-screen').style.display = 'flex';
 
@@ -1069,25 +1135,18 @@
             evolutionChart = new Chart(ctx, {
                 type: 'line',
                 data: { labels: [], datasets: [ { label: 'Peso (kg)', data: [], borderColor: '#059669', backgroundColor: '#059669', tension: 0.3 }, { label: 'Cintura (cm)', data: [], borderColor: '#2563eb', backgroundColor: '#2563eb', tension: 0.3, hidden: true }, { label: 'Abdômen (cm)', data: [], borderColor: '#d97706', backgroundColor: '#d97706', tension: 0.3 }, { label: 'Quadril (cm)', data: [], borderColor: '#7c3aed', backgroundColor: '#7c3aed', tension: 0.3, hidden: true } ] },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { 
-                        legend: { position: 'bottom' } 
-                    } 
-                },
-                // PLUGIN PERSONALIZADO PARA EXIBIR VALORES
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } },
                 plugins: [{
                     id: 'floatingLabels',
                     afterDatasetsDraw(chart, args, options) {
                         const { ctx } = chart;
                         chart.data.datasets.forEach((dataset, i) => {
-                            if(chart.isDatasetVisible(i) && dataset.label === 'Peso (kg)') { // Apenas para o peso
+                            if(chart.isDatasetVisible(i) && dataset.label === 'Peso (kg)') { 
                                 const meta = chart.getDatasetMeta(i);
                                 meta.data.forEach((element, index) => {
                                     const data = dataset.data[index];
                                     if(data !== null && data !== undefined) {
-                                        ctx.fillStyle = '#64748b'; // Cor Slate-500
+                                        ctx.fillStyle = '#64748b'; 
                                         ctx.font = 'bold 10px Inter';
                                         ctx.textAlign = 'center';
                                         ctx.textBaseline = 'bottom';
@@ -1143,18 +1202,28 @@
         }
         function hideSection(id) { if(confirm("Ocultar seção do paciente?")) { document.getElementById(id).classList.add('hidden'); triggerAutoSave(); } }
 
-        // --- Table Render Logic (Fixing Mobile "50 g" wrap) ---
         function updateFoodMacro(mid, fid, type, valStr) {
             const m = dietMeals.find(x => x.id === mid); if (!m) return;
             const f = m.foods[fid], val = parseFloat(valStr.replace(/[^0-9.]/g, ''));
             if (isNaN(val)) return;
-            if (type === 'cal') f.totalCal = val;
-            else if (type === 'carb') f.totalCarb = val;
-            else if (type === 'prot') f.totalProt = val;
-            else if (type === 'fat') f.totalFat = val;
-            else if (type === 'fiber') f.totalFiber = val;
+            if (type === 'cal') f.totalCal = val; else if (type === 'carb') f.totalCarb = val; else if (type === 'prot') f.totalProt = val; else if (type === 'fat') f.totalFat = val; else if (type === 'fiber') f.totalFiber = val;
             if (f.qty > 0) { const fac = f.qty / 100; if(type==='cal') f.cal=val/fac; if(type==='carb') f.carb=val/fac; if(type==='prot') f.prot=val/fac; if(type==='fat') f.fat=val/fac; if(type==='fiber') f.fiber=val/fac; }
             renderDiet(); triggerAutoSave();
+        }
+
+        // FUNÇÃO DE TOGGLE PARA O ACORDEÃO
+        function toggleMealBody(mid) {
+            const body = document.getElementById(`meal-body-${mid}`);
+            const icon = document.getElementById(`chevron-${mid}`);
+            if (body.classList.contains('collapsed')) {
+                body.classList.remove('collapsed');
+                body.classList.add('expanded');
+                if(icon) icon.classList.remove('collapsed');
+            } else {
+                body.classList.remove('expanded');
+                body.classList.add('collapsed');
+                if(icon) icon.classList.add('collapsed');
+            }
         }
 
         function renderDiet() {
@@ -1163,6 +1232,9 @@
             const tc=parseFloat(document.getElementById('target-cal').value)||2000, tf=parseFloat(document.getElementById('target-fiber').value)||25;
             const pc=parseFloat(document.getElementById('target-carb-pct').value)||50, pp=parseFloat(document.getElementById('target-prot-pct').value)||30, pf=parseFloat(document.getElementById('target-fat-pct').value)||20;
             document.getElementById('total-pct-display').innerText = (pc+pp+pf);
+            
+            // Verifica se está em View Mode para padrão de acordeão
+            const isViewMode = document.body.classList.contains('view-mode');
 
             dietMeals.forEach((m, idx) => {
                 let mc={cal:0, c:0, p:0, f:0, fib:0};
@@ -1173,18 +1245,23 @@
                     const g = m.foods.filter(f=>f.option===opt);
                     if(g.length>0) {
                         let headerTitle = opt==='A'?'Opção Principal':'Opção '+opt;
-                        let swap = opt==='A' ? `<div class="flex gap-2 no-print group/header nutritionist-only"><button onclick="swapMealOptions(${m.id},'A','B')" class="text-[10px] bg-slate-200 px-2 rounded">⬇ B</button><button onclick="swapMealOptions(${m.id},'A','C')" class="text-[10px] bg-slate-200 px-2 rounded">⬇ C</button></div>` : `<div class="no-print group/header nutritionist-only"><button onclick="swapMealOptions(${m.id},'A','${opt}')" class="text-[10px] bg-emerald-100 text-emerald-700 px-2 rounded font-bold border border-emerald-200">⬆ Principal</button></div>`;
-                        if(opt!=='A'||m.foods.some(x=>x.option!=='A')) html+=`<div class="bg-slate-50 px-4 py-2 border-y border-slate-100 mt-2 flex justify-between items-center group/header"><span class="text-xs font-bold text-slate-500 uppercase">${headerTitle}</span>${swap}</div>`;
+                        let headerClass = opt==='A'?'option-group-A':(opt==='B'?'option-group-B':'option-group-C'); // Classe visual de distinção
                         
-                        // TABLE START
+                        let swap = opt==='A' ? `<div class="flex gap-2 no-print group/header nutritionist-only"><button onclick="swapMealOptions(${m.id},'A','B')" class="text-[10px] bg-slate-200 px-2 rounded">⬇ B</button><button onclick="swapMealOptions(${m.id},'A','C')" class="text-[10px] bg-slate-200 px-2 rounded">⬇ C</button></div>` : `<div class="no-print group/header nutritionist-only"><button onclick="swapMealOptions(${m.id},'A','${opt}')" class="text-[10px] bg-emerald-100 text-emerald-700 px-2 rounded font-bold border border-emerald-200">⬆ Principal</button></div>`;
+                        
+                        // Wrapper da opção com classe distinta
+                        html += `<div class="${headerClass} p-1">`;
+                        
+                        if(opt!=='A'||m.foods.some(x=>x.option!=='A')) html+=`<div class="px-2 py-1 flex justify-between items-center group/header"><span class="text-xs font-bold text-slate-500 uppercase">${headerTitle}</span>${swap}</div>`;
+                        
                         html+=`<div class="table-container"><div class="hidden md:block"><table class="w-full text-left text-sm"><tbody class="divide-y divide-slate-100">`;
                         
-                        // DESKTOP ROWS
                         g.forEach(f => {
                             const i = m.foods.indexOf(f);
                             html+=`<tr class="hover:bg-slate-50 group">
                                 <td class="p-3 font-medium col-name" contenteditable="true" onblur="updateFoodName(${m.id},${i},this.innerText)">${f.name}</td>
-                                <td class="p-3 col-qty whitespace-nowrap"><div class="flex items-center justify-center"><input type="number" class="qty-input" value="${f.qty}" onchange="updateFoodQty(${m.id},${i},this.value)"><span class="ml-1">g</span></div></td>
+                                <td class="p-3 col-qty whitespace-nowrap"><div class="flex items-center justify-end"><input type="number" class="qty-input" value="${f.qty}" onchange="updateFoodQty(${m.id},${i},this.value)"></div></td>
+                                <td class="p-3 col-unit whitespace-nowrap text-left pl-1"><span class="ml-1">g</span></td>
                                 <td class="p-3 text-center text-xs col-cal cursor-text hover:bg-slate-100 rounded whitespace-nowrap" contenteditable="true" onblur="updateFoodMacro(${m.id},${i},'cal',this.innerText)">${f.totalCal.toFixed(0)} kcal</td>
                                 <td class="p-3 text-center text-[10px] col-macro cursor-text hover:bg-slate-100 rounded whitespace-nowrap hide-macros" contenteditable="true" onblur="updateFoodMacro(${m.id},${i},'carb',this.innerText)">C: ${f.totalCarb.toFixed(0)}</td>
                                 <td class="p-3 text-center text-[10px] col-macro cursor-text hover:bg-slate-100 rounded whitespace-nowrap hide-macros" contenteditable="true" onblur="updateFoodMacro(${m.id},${i},'prot',this.innerText)">P: ${f.totalProt.toFixed(0)}</td>
@@ -1202,13 +1279,12 @@
                         });
                         html+=`</tbody></table></div>`;
 
-                        // MOBILE ROWS (Visible only on small screens)
                         html+=`<div class="md:hidden divide-y divide-slate-100">`;
                         g.forEach(f => {
                             const i = m.foods.indexOf(f);
                             html+=`<div class="meal-table-row">
                                 <div class="font-medium text-sm leading-tight" contenteditable="true" onblur="updateFoodName(${m.id},${i},this.innerText)">${f.name}</div>
-                                <div class="text-sm font-bold whitespace-nowrap flex items-center bg-slate-50 rounded px-2"><input type="number" class="qty-input w-10 bg-transparent" value="${f.qty}" onchange="updateFoodQty(${m.id},${i},this.value)"> g</div>
+                                <div class="text-sm font-bold whitespace-nowrap inline-flex items-center bg-slate-50 rounded px-2 w-fit"><input type="number" class="qty-input w-10 bg-transparent text-right" value="${f.qty}" onchange="updateFoodQty(${m.id},${i},this.value)"> <span class="ml-1">g</span></div>
                                 <div class="text-xs font-bold text-slate-500 whitespace-nowrap">${f.totalCal.toFixed(0)} kcal</div>
                                 <div class="meal-table-macros hide-macros">
                                     <span class="text-blue-600">C:${f.totalCarb.toFixed(0)}</span>
@@ -1219,252 +1295,114 @@
                             </div>`;
                         });
                         html+=`</div></div>`;
+                        html += `</div>`; // Fechar wrapper da opção
                     }
                 });
                 
                 if(m.foods.length===0) html=`<div class="p-6 text-center text-slate-400 text-sm italic no-print nutritionist-only">Nenhum alimento.</div>`;
 
+                // Logic for Accordion Default State
+                const initialClass = isViewMode ? 'collapsed' : 'expanded';
+                const initialIconClass = isViewMode ? 'collapsed' : '';
+
                 c.innerHTML += `<div class="card meal-card bg-white rounded-xl shadow-sm theme-border border overflow-hidden relative group mt-4">
                     <div class="absolute top-4 right-4 flex gap-2 no-print opacity-0 group-hover:opacity-100 z-10 nutritionist-only"><button onclick="duplicateMeal(${m.id})" class="text-slate-300 hover:text-blue-500"><i class="fa-regular fa-copy"></i></button><button onclick="deleteMeal(${m.id})" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></div>
-                    <div class="meal-header theme-bg-light p-4 border-b theme-border flex justify-between items-center"><div class="flex items-center gap-3"><div class="flex flex-col gap-1 no-print nutritionist-only"><button onclick="moveMeal(${idx},-1)"><i class="fa-solid fa-chevron-up text-slate-400 text-[10px]"></i></button><button onclick="moveMeal(${idx},1)"><i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i></button></div><h3 class="font-bold text-slate-700 cursor-text" contenteditable="true" onblur="updateMealTitle(${m.id},this.innerText)">${m.title}</h3><button onclick="toggleEmojiPicker(${m.id}, event)" class="text-slate-400 hover:text-yellow-500 no-print emoji-trigger nutritionist-only"><i class="fa-solid fa-face-smile"></i></button></div></div>
-                    <div>${html}</div>
-                    <div class="totals-footer p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap justify-end gap-x-6 gap-y-2 text-xs font-bold text-slate-600">
-                        <span>Total: ${mc.cal.toFixed(0)} kcal</span>
-                        <span class="text-blue-600">C: ${mc.c.toFixed(0)}g</span>
-                        <span class="text-emerald-600">P: ${mc.p.toFixed(0)}g</span>
-                        <span class="text-yellow-600">G: ${mc.f.toFixed(0)}g</span>
-                        <span class="text-orange-600">F: ${mc.fib.toFixed(1)}g</span>
+                    
+                    <div class="meal-header theme-bg-light p-4 border-b theme-border flex justify-between items-center cursor-pointer" onclick="toggleMealBody(${m.id})">
+                        <div class="flex items-center gap-3">
+                            <div class="flex flex-col gap-1 no-print nutritionist-only" onclick="event.stopPropagation()"><button onclick="moveMeal(${idx},-1)"><i class="fa-solid fa-chevron-up text-slate-400 text-[10px]"></i></button><button onclick="moveMeal(${idx},1)"><i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i></button></div>
+                            <h3 class="font-bold text-slate-700 cursor-text" contenteditable="true" onblur="updateMealTitle(${m.id},this.innerText)" onclick="event.stopPropagation()">${m.title}</h3>
+                            <button onclick="toggleEmojiPicker(${m.id}, event)" class="text-slate-400 hover:text-yellow-500 no-print emoji-trigger nutritionist-only"><i class="fa-solid fa-face-smile"></i></button>
+                        </div>
+                        <i id="chevron-${m.id}" class="fa-solid fa-chevron-down text-slate-400 chevron-icon ${initialIconClass}"></i>
                     </div>
-                    <div class="px-4 pb-4 pt-2 border-t border-slate-100 relative group/obs"><div class="flex justify-between items-center mb-1"><span class="text-[10px] font-bold text-slate-400 uppercase">Observações</span><button onclick="clearMealObservation(${m.id})" class="no-print opacity-0 group-hover/obs:opacity-100 text-slate-300 hover:text-red-500 nutritionist-only"><i class="fa-solid fa-xmark"></i></button></div><div class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm text-slate-600 outline-none" contenteditable="true" onblur="updateMealObservation(${m.id},this.innerText)">${m.observation||''}</div></div>
-                    <div class="patient-footer-link p-2 text-center theme-bg-light border-t theme-border mt-0"><span class="text-[10px] font-medium theme-text">Deseja substituir algum alimento? 🥗 <a href="https://romulo-f-monteiro.github.io/nutrientes/" target="_blank" class="font-bold underline">Clique aqui</a></span></div>
+                    
+                    <div id="meal-body-${m.id}" class="meal-body ${initialClass}">
+                        <div>${html}</div>
+                        <div class="totals-footer p-3 bg-slate-50 border-t border-slate-100 flex flex-wrap justify-end gap-x-6 gap-y-2 text-xs font-bold text-slate-600">
+                            <span>Total: ${mc.cal.toFixed(0)} kcal</span>
+                            <span class="text-blue-600">C: ${mc.c.toFixed(0)}g</span>
+                            <span class="text-emerald-600">P: ${mc.p.toFixed(0)}g</span>
+                            <span class="text-yellow-600">G: ${mc.f.toFixed(0)}g</span>
+                            <span class="text-orange-600">F: ${mc.fib.toFixed(1)}g</span>
+                        </div>
+                        <div class="px-4 pb-4 pt-2 border-t border-slate-100 relative group/obs"><div class="flex justify-between items-center mb-1"><span class="text-[10px] font-bold text-slate-400 uppercase">Observações</span><button onclick="clearMealObservation(${m.id})" class="no-print opacity-0 group-hover/obs:opacity-100 text-slate-300 hover:text-red-500 nutritionist-only"><i class="fa-solid fa-xmark"></i></button></div><div class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm text-slate-600 outline-none" contenteditable="true" onblur="updateMealObservation(${m.id},this.innerText)">${m.observation||''}</div></div>
+                        <!-- LINK DE RECEITAS ADICIONADO AQUI -->
+                        <div class="patient-footer-link p-2 text-center theme-bg-light border-t theme-border mt-0">
+                            <span class="text-[10px] font-medium theme-text">
+                                Deseja substituir algum alimento? 🥗 <a href="https://romulo-f-monteiro.github.io/nutrientes/" target="_blank" class="font-bold underline">Clique aqui</a>
+                                <span class="mx-2 text-slate-300">|</span>
+                                <a href="https://romulo-f-monteiro.github.io/RFM_receitas/" target="_blank" class="font-bold underline">Receitas 🍳</a>
+                            </span>
+                        </div>
+                    </div>
                 </div>`;
             });
 
-            c.innerHTML += `<div class="card summary-card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 mt-6"><div class="p-4 border-b border-slate-700 flex justify-between"><h3 class="font-bold flex items-center gap-2"><i class="fa-solid fa-chart-pie text-emerald-400"></i> 🍎 Ingestão Diária</h3><span class="text-xs text-slate-400"></span></div><div class="p-6 pt-2 pb-6"><div class="grid grid-cols-2 md:grid-cols-5 gap-6 text-center"><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Calorias</div><div class="text-3xl font-bold">${dt.cal.toFixed(0)}</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Carboidrato</div><div class="text-2xl font-bold text-blue-400">${dt.c.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Proteína</div><div class="text-2xl font-bold text-emerald-400">${dt.p.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Gordura</div><div class="text-2xl font-bold text-yellow-400">${dt.f.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Fibras</div><div class="text-2xl font-bold text-orange-400">${dt.fib.toFixed(0)}g</div></div></div><p class="text-xs text-slate-400 mt-6 font-light">Aqui está a soma de todas as opções principais de alimentos que compõem sua dieta. É importante destacar que nem sempre é fácil atingir a meta diária.</p></div></div>`;
+            // Summary Cards - Centralizados
+            c.innerHTML += `<div class="card summary-card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 mt-6"><div class="p-4 border-b border-slate-700 flex justify-between"><h3 class="font-bold flex items-center gap-2 text-center w-full justify-center"><i class="fa-solid fa-chart-pie text-emerald-400"></i> 🍎 Ingestão Diária</h3><span class="text-xs text-slate-400"></span></div><div class="p-6 pt-2 pb-6"><div class="grid grid-cols-2 md:grid-cols-5 gap-6 text-center"><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Calorias</div><div class="text-3xl font-bold">${dt.cal.toFixed(0)}</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Carboidrato</div><div class="text-2xl font-bold text-blue-400">${dt.c.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Proteína</div><div class="text-2xl font-bold text-emerald-400">${dt.p.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Gordura</div><div class="text-2xl font-bold text-yellow-400">${dt.f.toFixed(0)}g</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Fibras</div><div class="text-2xl font-bold text-orange-400">${dt.fib.toFixed(0)}g</div></div></div><p class="text-xs text-slate-400 mt-6 font-light text-center">Aqui está a soma de todas as opções principais de alimentos que compõem sua dieta. É importante destacar que nem sempre é fácil atingir a meta diária.</p></div></div>`;
 
-            if(showGoals) c.innerHTML += `<div class="card summary-card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 mt-4 relative group"><button onclick="removeGoals()" class="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition no-print nutritionist-only opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash-can"></i></button><div class="p-4 border-b border-slate-700 flex justify-between items-center"><h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-flag-checkered text-emerald-400"></i> Meta diária de ingestão</h3></div><div class="p-6 pt-2 pb-6"><div class="grid grid-cols-2 md:grid-cols-5 gap-6 text-center"><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Kcal</div><div class="text-3xl font-bold text-white">${tc.toFixed(0)}</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Carbo</div><div class="text-2xl font-bold text-blue-400">${(tc*(pc/100)/4).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pc}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Prot</div><div class="text-2xl font-bold text-emerald-400">${(tc*(pp/100)/4).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pp}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Gord</div><div class="text-2xl font-bold text-yellow-400">${(tc*(pf/100)/9).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pf}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Fibras</div><div class="text-2xl font-bold text-orange-400">${tf.toFixed(0)}g</div></div></div><p class="text-xs text-slate-400 mt-6 font-light">Essa meta diária é definida de acordo com seu objetivo, peso, altura, idade, entre outros fatores.</p></div></div>`;
+            if(showGoals) c.innerHTML += `<div class="card summary-card bg-slate-800 text-white rounded-xl shadow-md border border-slate-700 mt-4 relative group"><button onclick="removeGoals()" class="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition no-print nutritionist-only opacity-0 group-hover:opacity-100"><i class="fa-solid fa-trash-can"></i></button><div class="p-4 border-b border-slate-700 flex justify-between items-center"><h3 class="font-bold text-lg flex items-center gap-2 w-full justify-center"><i class="fa-solid fa-flag-checkered text-emerald-400"></i> Meta diária de ingestão</h3></div><div class="p-6 pt-2 pb-6"><div class="grid grid-cols-2 md:grid-cols-5 gap-6 text-center"><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Kcal</div><div class="text-3xl font-bold text-white">${tc.toFixed(0)}</div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Carbo</div><div class="text-2xl font-bold text-blue-400">${(tc*(pc/100)/4).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pc}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Prot</div><div class="text-2xl font-bold text-emerald-400">${(tc*(pp/100)/4).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pp}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Gord</div><div class="text-2xl font-bold text-yellow-400">${(tc*(pf/100)/9).toFixed(0)}g <span class="text-xs text-slate-500 font-normal">(${pf}%)</span></div></div><div><div class="text-xs text-slate-400 uppercase tracking-wider mb-1">Meta Fibras</div><div class="text-2xl font-bold text-orange-400">${tf.toFixed(0)}g</div></div></div><p class="text-xs text-slate-400 mt-6 font-light text-center">Essa meta diária é definida de acordo com seu objetivo, peso, altura, idade, entre outros fatores.</p></div></div>`;
             
             const w=document.getElementById('comparison-widget'); if(w) w.innerHTML=`<div class="flex justify-end border-b pb-1 mb-2 text-[11px] font-bold text-slate-500"><span>Consumido / Meta</span></div><div class="flex justify-between"><span class="text-slate-500">Calorias:</span><span class="font-bold ${dt.cal-tc>100?'text-red-500':'text-green-500'}">${dt.cal.toFixed(0)} / ${tc.toFixed(0)}</span></div><div class="flex justify-between"><span class="text-blue-500">Carboidrato:</span><span>${dt.c.toFixed(0)}g / ${(tc*(pc/100)/4).toFixed(0)}g</span></div><div class="flex justify-between"><span class="text-emerald-500">Proteína:</span><span>${dt.p.toFixed(0)}g / ${(tc*(pp/100)/4).toFixed(0)}g</span></div><div class="flex justify-between"><span class="text-yellow-500">Gordura:</span><span>${dt.f.toFixed(0)}g / ${(tc*(pf/100)/9).toFixed(0)}g</span></div><div class="flex justify-between"><span class="text-orange-500">Fibras:</span><span>${dt.fib.toFixed(0)}g / ${tf}g</span></div>`;
         }
 
-        // ==================================================
-        // === LÓGICA DAS NOVAS METAS (HÁBITOS) ===
-        // ==================================================
-
         function renderCustomGoals() {
             const container = document.getElementById('habit-goals-container');
             container.innerHTML = '';
-
             customGoals.forEach((goal, index) => {
-                const daysHtml = goal.days.map((checked, dayIndex) => 
-                    `<div class="habit-check ${checked ? 'checked' : 'bg-slate-100'}" 
-                           onclick="toggleHabitDay(${index}, ${dayIndex})"></div>`
-                ).join('');
-
-                // Opções de ícones para o select
-                const iconOptions = habitIcons.map(icon => 
-                    `<option value="${icon}" ${goal.icon === icon ? 'selected' : ''}>${icon}</option>`
-                ).join('');
-
-                const html = `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 relative group">
-                        <div class="flex justify-between items-center mb-3">
-                            <div class="flex items-center gap-2 flex-1">
-                                <select class="bg-transparent text-xl cursor-pointer outline-none w-12" 
-                                        onchange="updateHabitIcon(${index}, this.value)" 
-                                        ${document.body.classList.contains('view-mode') ? 'disabled' : ''}>
-                                    ${iconOptions}
-                                </select>
-                                <input type="text" 
-                                       class="font-semibold text-slate-700 bg-transparent outline-none w-full border-b border-transparent hover:border-slate-200 focus:border-blue-400 transition" 
-                                       value="${goal.title}" 
-                                       placeholder="Nome da Meta"
-                                       onblur="updateHabitTitle(${index}, this.value)">
-                            </div>
-                            <button onclick="deleteCustomGoal(${index})" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition nutritionist-only"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                        <div class="habit-grid">
-                            ${daysHtml}
-                        </div>
-                        <div class="flex justify-between items-center mt-2">
-                             <span class="text-[10px] text-slate-300 italic">Marque aqui</span>
-                             <span class="text-[10px] text-slate-400 font-medium">${goal.days.filter(d => d).length}/30 dias</span>
-                        </div>
-                    </div>
-                `;
+                const daysHtml = goal.days.map((checked, dayIndex) => `<div class="habit-check ${checked ? 'checked' : 'bg-slate-100'}" onclick="toggleHabitDay(${index}, ${dayIndex})"></div>`).join('');
+                const iconOptions = habitIcons.map(icon => `<option value="${icon}" ${goal.icon === icon ? 'selected' : ''}>${icon}</option>`).join('');
+                const html = `<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 relative group"><div class="flex justify-between items-center mb-3"><div class="flex items-center gap-2 flex-1"><select class="bg-transparent text-xl cursor-pointer outline-none w-12" onchange="updateHabitIcon(${index}, this.value)" ${document.body.classList.contains('view-mode') ? 'disabled' : ''}>${iconOptions}</select><input type="text" class="font-semibold text-slate-700 bg-transparent outline-none w-full border-b border-transparent hover:border-slate-200 focus:border-blue-400 transition" value="${goal.title}" placeholder="Nome da Meta" onblur="updateHabitTitle(${index}, this.value)"></div><button onclick="deleteCustomGoal(${index})" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition nutritionist-only"><i class="fa-solid fa-trash-can"></i></button></div><div class="habit-grid">${daysHtml}</div><div class="flex justify-between items-center mt-2"><span class="text-[10px] text-slate-300 italic">Marque aqui</span><span class="text-[10px] text-slate-400 font-medium">${goal.days.filter(d => d).length}/30 dias</span></div></div>`;
                 container.innerHTML += html;
             });
         }
-
-        function addCustomGoal() {
-            customGoals.push({
-                title: "Nova Meta",
-                icon: "💧",
-                days: Array(30).fill(false)
-            });
-            renderCustomGoals();
-            triggerAutoSave();
-        }
-
-        function deleteCustomGoal(index) {
-            if(confirm("Excluir esta meta?")) {
-                customGoals.splice(index, 1);
-                renderCustomGoals();
-                triggerAutoSave();
-            }
-        }
-
-        function toggleHabitDay(goalIndex, dayIndex) {
-            customGoals[goalIndex].days[dayIndex] = !customGoals[goalIndex].days[dayIndex];
-            renderCustomGoals();
-            triggerAutoSave();
-        }
-
-        function updateHabitTitle(index, newTitle) {
-            customGoals[index].title = newTitle;
-            triggerAutoSave();
-        }
-
-        function updateHabitIcon(index, newIcon) {
-            customGoals[index].icon = newIcon;
-            renderCustomGoals();
-            triggerAutoSave();
-        }
-
-        // ========================================
-        // === LÓGICA DE ATIVIDADES FÍSICAS ===
-        // ========================================
+        function addCustomGoal() { customGoals.push({ title: "Nova Meta", icon: "💧", days: Array(30).fill(false) }); renderCustomGoals(); triggerAutoSave(); }
+        function deleteCustomGoal(index) { if(confirm("Excluir esta meta?")) { customGoals.splice(index, 1); renderCustomGoals(); triggerAutoSave(); } }
+        function toggleHabitDay(goalIndex, dayIndex) { customGoals[goalIndex].days[dayIndex] = !customGoals[goalIndex].days[dayIndex]; renderCustomGoals(); triggerAutoSave(); }
+        function updateHabitTitle(index, newTitle) { customGoals[index].title = newTitle; triggerAutoSave(); }
+        function updateHabitIcon(index, newIcon) { customGoals[index].icon = newIcon; renderCustomGoals(); triggerAutoSave(); }
 
         function renderActivities() {
-            const list = document.getElementById('activity-list');
-            list.innerHTML = '';
-            
+            const list = document.getElementById('activity-list'); list.innerHTML = '';
             physicalActivities.forEach((act, idx) => {
-                const html = `
-                    <div class="flex flex-col gap-2 p-4 bg-slate-50 border border-slate-100 rounded-lg group hover:border-slate-200 transition">
-                         <div class="flex gap-2 items-center">
-                             <div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0">
-                                <i class="fa-solid fa-person-running"></i>
-                             </div>
-                             <div class="flex-1 w-full">
-                                <input type="text" class="font-bold text-slate-700 bg-transparent w-full outline-none placeholder-slate-400 text-sm" 
-                                       value="${act.name}" placeholder="Nome da Atividade" 
-                                       onblur="updateActivityName(${idx}, this.value)">
-                             </div>
-                             <button onclick="deleteActivity(${idx})" class="nutritionist-only text-slate-300 hover:text-red-500 px-2 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash-can"></i></button>
-                         </div>
-                         
-                         <div class="ml-10">
-                            <div class="text-sm text-slate-500 bg-transparent w-full outline-none mb-2 whitespace-pre-wrap break-words cursor-text" 
-                                 contenteditable="true" 
-                                 placeholder="Descreva a prática atual (ex: 3x semana, 30min)..." 
-                                 onblur="updateActivityDesc(${idx}, this.innerText)">${act.desc}</div>
-                           
-                            <div class="flex items-start gap-2 mt-2 pt-2 border-t border-slate-100">
-                                <span class="text-xs font-bold text-emerald-600 uppercase w-24 shrink-0 mt-0.5">Recomendação:</span>
-                                <div class="text-sm font-medium text-slate-700 bg-transparent w-full outline-none whitespace-pre-wrap break-words cursor-text" 
-                                       contenteditable="true" 
-                                       placeholder="Digite a meta recomendada..." 
-                                       onblur="updateActivityRec(${idx}, this.innerText)">${act.rec || ''}</div>
-                            </div>
-                         </div>
-                    </div>
-                `;
+                const html = `<div class="flex flex-col gap-2 p-4 bg-slate-50 border border-slate-100 rounded-lg group hover:border-slate-200 transition"><div class="flex gap-2 items-center"><div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0"><i class="fa-solid fa-person-running"></i></div><div class="flex-1 w-full"><input type="text" class="font-bold text-slate-700 bg-transparent w-full outline-none placeholder-slate-400 text-sm" value="${act.name}" placeholder="Nome da Atividade" onblur="updateActivityName(${idx}, this.value)"></div><button onclick="deleteActivity(${idx})" class="nutritionist-only text-slate-300 hover:text-red-500 px-2 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash-can"></i></button></div><div class="ml-10"><div class="text-sm text-slate-500 bg-transparent w-full outline-none mb-2 whitespace-pre-wrap break-words cursor-text" contenteditable="true" placeholder="Descreva a prática atual (ex: 3x semana, 30min)..." onblur="updateActivityDesc(${idx}, this.innerText)">${act.desc}</div><div class="flex items-start gap-2 mt-2 pt-2 border-t border-slate-100"><span class="text-xs font-bold text-emerald-600 uppercase w-24 shrink-0 mt-0.5">Recomendação:</span><div class="text-sm font-medium text-slate-700 bg-transparent w-full outline-none whitespace-pre-wrap break-words cursor-text" contenteditable="true" placeholder="Digite a meta recomendada..." onblur="updateActivityRec(${idx}, this.innerText)">${act.rec || ''}</div></div></div></div>`;
                 list.innerHTML += html;
             });
         }
-
-        function addActivityRow() {
-            physicalActivities.push({ id: Date.now(), name: "Nova Atividade - Atual", desc: "", rec: "" });
-            renderActivities();
-            triggerAutoSave();
-        }
-        
-        function deleteActivity(idx) {
-             if(confirm("Remover atividade?")) {
-                 physicalActivities.splice(idx, 1);
-                 renderActivities();
-                 triggerAutoSave();
-             }
-        }
-        
-        function updateActivityName(idx, val) {
-            physicalActivities[idx].name = val;
-            triggerAutoSave();
-        }
-
-        function updateActivityDesc(idx, val) {
-            physicalActivities[idx].desc = val;
-            triggerAutoSave();
-        }
-        
-        function updateActivityRec(idx, val) {
-            physicalActivities[idx].rec = val;
-            triggerAutoSave();
-        }
+        function addActivityRow() { physicalActivities.push({ id: Date.now(), name: "Nova Atividade - Atual", desc: "", rec: "" }); renderActivities(); triggerAutoSave(); }
+        function deleteActivity(idx) { if(confirm("Remover atividade?")) { physicalActivities.splice(idx, 1); renderActivities(); triggerAutoSave(); } }
+        function updateActivityName(idx, val) { physicalActivities[idx].name = val; triggerAutoSave(); }
+        function updateActivityDesc(idx, val) { physicalActivities[idx].desc = val; triggerAutoSave(); }
+        function updateActivityRec(idx, val) { physicalActivities[idx].rec = val; triggerAutoSave(); }
 
         function addToPlan() {
             const mid = parseInt(document.getElementById('select-meal').value);
             const fid = parseInt(document.getElementById('select-food').value);
             const qty = parseFloat(document.getElementById('input-qty').value);
             const opt = document.querySelector('input[name="meal-option"]:checked').value;
-
             if(!mid || !fid || isNaN(qty) || qty <= 0) return showToast("Dados inválidos", "error");
-
             const meal = dietMeals.find(m => m.id === mid);
             const food = foodDatabase.find(f => f.id === fid);
-
             if(!meal || !food) return;
-
             const fac = qty / 100;
-            const newFood = {
-                ...food,
-                qty: qty,
-                option: opt,
-                totalCal: food.cal * fac,
-                totalCarb: food.carb * fac,
-                totalProt: food.prot * fac,
-                totalFat: food.fat * fac,
-                totalFiber: (food.fiber || 0) * fac
-            };
-
+            const newFood = { ...food, qty: qty, option: opt, totalCal: food.cal * fac, totalCarb: food.carb * fac, totalProt: food.prot * fac, totalFat: food.fat * fac, totalFiber: (food.fiber || 0) * fac };
             meal.foods.push(newFood);
-            renderDiet();
-            triggerAutoSave();
-            showToast("Alimento adicionado!");
+            renderDiet(); triggerAutoSave(); showToast("Alimento adicionado!");
         }
 
-        // --- Recalcular Macros ao editar quantidade ---
         function updateFoodQty(mid, fid, val) {
-            const m = dietMeals.find(x => x.id === mid);
-            if (!m) return;
+            const m = dietMeals.find(x => x.id === mid); if (!m) return;
             const f = m.foods[fid];
-            let qty = parseFloat(val);
-            if (isNaN(qty) || qty < 0) qty = 0; // Permite 0, mas evita NaN
-            
-            f.qty = qty;
-            const fac = qty / 100;
-            
-            // Recalcula totais com base nos valores por 100g (que já estão em f.cal, f.carb, etc do objeto original ou minificado)
-            // Se o app usa f.cal como base 100g:
-            f.totalCal = f.cal * fac;
-            f.totalCarb = f.carb * fac;
-            f.totalProt = f.prot * fac;
-            f.totalFat = f.fat * fac;
-            f.totalFiber = (f.fiber || 0) * fac;
-            
-            renderDiet();
-            triggerAutoSave();
+            let qty = parseFloat(val); if (isNaN(qty) || qty < 0) qty = 0;
+            f.qty = qty; const fac = qty / 100;
+            f.totalCal = f.cal * fac; f.totalCarb = f.carb * fac; f.totalProt = f.prot * fac; f.totalFat = f.fat * fac; f.totalFiber = (f.fiber || 0) * fac;
+            renderDiet(); triggerAutoSave();
         }
 
-
-        // Functions below unchanged but re-declared for scope safety in one file
         function updateFoodName(mid, fid, v) { const m=dietMeals.find(x=>x.id===mid); if(m&&m.foods[fid]) { m.foods[fid].name=v.trim(); triggerAutoSave(); } }
         function moveFood(mid, fid, d) { const m=dietMeals.find(x=>x.id===mid); if(!m)return; const ni=fid+d; if(ni>=0 && ni<m.foods.length) { [m.foods[fid], m.foods[ni]] = [m.foods[ni], m.foods[fid]]; renderDiet(); triggerAutoSave(); } }
-        
-        // --- FUNÇÃO ADICIONADA PARA MOVER REFEIÇÕES ---
         function moveMeal(i, d) { const ni = i + d; if (ni >= 0 && ni < dietMeals.length) { [dietMeals[i], dietMeals[ni]] = [dietMeals[ni], dietMeals[i]]; renderDiet(); triggerAutoSave(); } }
-
         function removeFood(mid, fid) { const m=dietMeals.find(x=>x.id===mid); if(m) { m.foods.splice(fid,1); renderDiet(); triggerAutoSave(); } }
         function removeGoals() { showGoals=false; renderDiet(); }
         function swapMealOptions(mid, o1, o2) { const m=dietMeals.find(x=>x.id===mid); if(!m)return; m.foods.forEach(f=>{ if(f.option===o1)f.option='T'; }); m.foods.forEach(f=>{ if(f.option===o2)f.option=o1; }); m.foods.forEach(f=>{ if(f.option==='T')f.option=o2; }); renderDiet(); triggerAutoSave(); }
@@ -1487,11 +1425,11 @@
         function savePatientsList(l) { localStorage.setItem('diet_patients_list', JSON.stringify(l)); }
         function openPatientModal() { const l = getPatientsList(); const u = document.getElementById('patient-list'); u.innerHTML = ''; if (l.length === 0) document.getElementById('empty-patients').classList.remove('hidden'); else { document.getElementById('empty-patients').classList.add('hidden'); l.forEach(p => { const a = p.id === currentPatientId; const d = new Date(p.lastModified).toLocaleDateString('pt-BR'); const li = document.createElement('li'); li.className = `p-3 flex justify-between items-center hover:bg-slate-100 transition cursor-pointer ${a ? 'bg-blue-50 border-l-4 border-blue-500' : ''}`; li.onclick = (e) => { if(!e.target.closest('button')) loadPatient(p.id); }; li.innerHTML = `<div><div class="font-bold text-slate-800">${p.name}</div><div class="text-[10px] text-slate-400">Mod: ${d}</div></div><div class="flex gap-2">${a ? '<span class="text-xs text-blue-500 font-bold px-2 py-1 bg-blue-100 rounded">Ativo</span>' : ''}<button onclick="deletePatient('${p.id}')" class="text-slate-300 hover:text-red-500 p-2 transition"><i class="fa-solid fa-trash"></i></button></div>`; u.appendChild(li); }); } document.getElementById('patient-modal').classList.remove('hidden'); }
         function closePatientModal() { document.getElementById('patient-modal').classList.add('hidden'); }
-        function createNewPatient() { currentPatientId = 'pat_' + Date.now(); dietMeals = JSON.parse(JSON.stringify(defaultMeals)); customGoals = []; physicalActivities = JSON.parse(JSON.stringify(defaultActivities)); activityGoalText = ""; currentTheme = 'emerald'; document.getElementById('patient-name').value = "Novo Paciente"; document.getElementById('patient-goal').value = ""; document.getElementById('diet-date').valueAsDate = new Date(); document.getElementById('logo-img-main').classList.add('hidden'); document.getElementById('logo-placeholder').classList.remove('hidden'); document.getElementById('logo-img-footer').classList.add('hidden'); document.getElementById('logo-placeholder-footer').classList.remove('hidden'); document.getElementById('target-cal').value = 2000; document.getElementById('target-fiber').value = 25; document.getElementById('calc-weight').value = ""; document.getElementById('calc-height').value = ""; document.getElementById('calc-age').value = ""; document.getElementById('goals-area').innerText = ""; const tb = document.querySelector('#history-table tbody'); tb.innerHTML = ''; for(let i=0; i<5; i++) addHistoryRow(); updateChartData(); saveCurrentPatientState(); renderMealSelect(); renderDiet(); renderCustomGoals(); renderActivities(); setTheme('emerald'); closePatientModal(); showToast("Criado!"); }
+        function createNewPatient() { currentPatientId = 'pat_' + Date.now(); dietMeals = JSON.parse(JSON.stringify(defaultMeals)); customGoals = []; physicalActivities = JSON.parse(JSON.stringify(defaultActivities)); activityGoalText = ""; currentTheme = 'emerald'; document.getElementById('patient-name').value = "Novo Paciente"; document.getElementById('patient-goal').value = ""; document.getElementById('header-prof-name-input').value = ""; document.getElementById('diet-date').valueAsDate = new Date(); document.getElementById('logo-img-main').classList.add('hidden'); document.getElementById('logo-placeholder').classList.remove('hidden'); document.getElementById('logo-img-footer').classList.add('hidden'); document.getElementById('logo-placeholder-footer').classList.remove('hidden'); document.getElementById('target-cal').value = 2000; document.getElementById('target-fiber').value = 25; document.getElementById('calc-weight').value = ""; document.getElementById('calc-height').value = ""; document.getElementById('calc-age').value = ""; document.getElementById('goals-area').innerText = ""; const tb = document.querySelector('#history-table tbody'); tb.innerHTML = ''; for(let i=0; i<5; i++) addHistoryRow(); updateChartData(); saveCurrentPatientState(); renderMealSelect(); renderDiet(); renderCustomGoals(); renderActivities(); setTheme('emerald'); closePatientModal(); showToast("Criado!"); }
         function deletePatient(id) { if(!confirm("Apagar?")) return; let l = getPatientsList().filter(p => p.id !== id); savePatientsList(l); localStorage.removeItem('diet_data_' + id); if(id === currentPatientId) createNewPatient(); else openPatientModal(); }
-        function loadPatient(id) { const d = localStorage.getItem('diet_data_' + id); if (!d) return false; try { const da = JSON.parse(d); currentPatientId = id; dietMeals = (!da.meals || da.meals.length === 0) ? JSON.parse(JSON.stringify(defaultMeals)) : da.meals; currentTheme = da.theme || 'emerald'; customGoals = da.customGoals || []; physicalActivities = da.physicalActivities || JSON.parse(JSON.stringify(defaultActivities)); activityGoalText = da.activityGoalText || ""; const f = ['patient-name','patient-goal','diet-date','prof-name','prof-crn','prof-phone','prof-insta','calc-weight','calc-height','calc-age','calc-bf','target-cal','target-carb-pct','target-prot-pct','target-fat-pct', 'target-fiber']; f.forEach(x => { if(document.getElementById(x) && da.inputs[x]!==undefined) document.getElementById(x).value = da.inputs[x]; }); if(da.selects) { document.getElementById('calc-formula').value = da.selects['calc-formula'] || 'mifflin'; document.getElementById('calc-activity').value = da.selects['calc-activity'] || '1.55'; const r = document.querySelector(`input[name="calc-sex"][value="${da.selects['calc-sex']}"]`); if(r) r.checked = true; } if(da.images) { const s = (i, p, src) => { if(src) { document.getElementById(i).src=src; document.getElementById(i).classList.remove('hidden'); document.getElementById(p).classList.add('hidden'); } else { document.getElementById(i).classList.add('hidden'); document.getElementById(p).classList.remove('hidden'); } }; s('logo-img-main', 'logo-placeholder', da.images.mainLogo); s('logo-img-footer', 'logo-placeholder-footer', da.images.footerLogo); } const tb = document.querySelector('#history-table tbody'); tb.innerHTML = ''; if(da.history && da.history.length > 0) { da.history.forEach((r) => { const tr = document.createElement('tr'); r.forEach(c => { const td = document.createElement('td'); td.className = "measure-cell"; td.contentEditable = "true"; td.innerText = c; td.onblur = function() { triggerAutoSave(); updateChartData(); }; tr.appendChild(td); }); const ta = document.createElement('td'); ta.className = "p-1 text-center no-print col-history-action nutritionist-only"; ta.innerHTML = '<button onclick="deleteHistoryRow(this)" class="text-slate-300 hover:text-red-500 p-1 transition"><i class="fa-solid fa-trash-can"></i></button>'; tr.appendChild(ta); tb.appendChild(tr); }); } else { for(let i=0; i<5; i++) addHistoryRow(); } if(da.goalsText) document.getElementById('goals-area').innerText = da.goalsText; setTheme(currentTheme); renderMealSelect(); renderDiet(); renderCustomGoals(); renderActivities(); calculateEnergy(); updateDateDisplay(); toggleBodyFatInput(); updateChartData(); updateInitials(); localStorage.setItem('diet_last_patient_id', id); closePatientModal(); showToast("Carregado!"); return true; } catch (e) { return false; } }
+        function loadPatient(id) { const d = localStorage.getItem('diet_data_' + id); if (!d) return false; try { const da = JSON.parse(d); currentPatientId = id; dietMeals = (!da.meals || da.meals.length === 0) ? JSON.parse(JSON.stringify(defaultMeals)) : da.meals; currentTheme = da.theme || 'emerald'; customGoals = da.customGoals || []; physicalActivities = da.physicalActivities || JSON.parse(JSON.stringify(defaultActivities)); activityGoalText = da.activityGoalText || ""; const f = ['patient-name','patient-goal','diet-date','prof-name','header-prof-name-input','prof-crn','prof-phone','prof-insta','calc-weight','calc-height','calc-age','calc-bf','target-cal','target-carb-pct','target-prot-pct','target-fat-pct', 'target-fiber']; f.forEach(x => { if(document.getElementById(x) && da.inputs[x]!==undefined) document.getElementById(x).value = da.inputs[x]; }); if(da.selects) { document.getElementById('calc-formula').value = da.selects['calc-formula'] || 'mifflin'; document.getElementById('calc-activity').value = da.selects['calc-activity'] || '1.55'; const r = document.querySelector(`input[name="calc-sex"][value="${da.selects['calc-sex']}"]`); if(r) r.checked = true; } if(da.images) { const s = (i, p, src) => { if(src) { document.getElementById(i).src=src; document.getElementById(i).classList.remove('hidden'); document.getElementById(p).classList.add('hidden'); } else { document.getElementById(i).classList.add('hidden'); document.getElementById(p).classList.remove('hidden'); } }; s('logo-img-main', 'logo-placeholder', da.images.mainLogo); s('logo-img-footer', 'logo-placeholder-footer', da.images.footerLogo); } const tb = document.querySelector('#history-table tbody'); tb.innerHTML = ''; if(da.history && da.history.length > 0) { da.history.forEach((r) => { const tr = document.createElement('tr'); r.forEach(c => { const td = document.createElement('td'); td.className = "measure-cell"; td.contentEditable = "true"; td.innerText = c; td.onblur = function() { triggerAutoSave(); updateChartData(); }; tr.appendChild(td); }); const ta = document.createElement('td'); ta.className = "p-1 text-center no-print col-history-action nutritionist-only"; ta.innerHTML = '<button onclick="deleteHistoryRow(this)" class="text-slate-300 hover:text-red-500 p-1 transition"><i class="fa-solid fa-trash-can"></i></button>'; tr.appendChild(ta); tb.appendChild(tr); }); } else { for(let i=0; i<5; i++) addHistoryRow(); } if(da.goalsText) document.getElementById('goals-area').innerText = da.goalsText; setTheme(currentTheme); renderMealSelect(); renderDiet(); renderCustomGoals(); renderActivities(); calculateEnergy(); updateDateDisplay(); toggleBodyFatInput(); updateChartData(); updateInitials(); localStorage.setItem('diet_last_patient_id', id); closePatientModal(); showToast("Carregado!"); return true; } catch (e) { return false; } }
         function triggerAutoSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(saveCurrentPatientState, 1000); }
-        function saveCurrentPatientState() { if (!currentPatientId) return; const inp = {}; ['patient-name','patient-goal','diet-date','prof-name','prof-crn','prof-phone','prof-insta','calc-weight','calc-height','calc-age','calc-bf','target-cal','target-carb-pct','target-prot-pct','target-fat-pct', 'target-fiber'].forEach(f => inp[f] = document.getElementById(f).value); const his = []; document.querySelectorAll('#history-table tbody tr').forEach(r => { const ro = []; r.querySelectorAll('td.measure-cell').forEach(c => ro.push(c.innerText)); his.push(ro); }); const da = { id: currentPatientId, lastModified: Date.now(), theme: currentTheme, inputs: inp, history: his, meals: dietMeals, customGoals: customGoals, physicalActivities: physicalActivities, activityGoalText: activityGoalText, goalsText: document.getElementById('goals-area').innerText, selects: { 'calc-formula': document.getElementById('calc-formula').value, 'calc-activity': document.getElementById('calc-activity').value, 'calc-sex': document.querySelector('input[name="calc-sex"]:checked').value }, images: { mainLogo: document.getElementById('logo-img-main').src.includes('data:') ? document.getElementById('logo-img-main').src : null, footerLogo: document.getElementById('logo-img-footer').src.includes('data:') ? document.getElementById('logo-img-footer').src : null } }; localStorage.setItem('diet_data_' + currentPatientId, JSON.stringify(da)); let l = getPatientsList(); const ix = l.findIndex(p => p.id === currentPatientId); const m = { id: currentPatientId, name: inp['patient-name'] || "Sem Nome", lastModified: Date.now() }; if (ix >= 0) l[ix] = m; else l.push(m); savePatientsList(l); const lb = document.getElementById('current-patient-label'); if(lb) lb.innerText = inp['patient-name'] || "Pacientes"; }
+        function saveCurrentPatientState() { if (!currentPatientId) return; const inp = {}; ['patient-name','patient-goal','diet-date','prof-name','header-prof-name-input','prof-crn','prof-phone','prof-insta','calc-weight','calc-height','calc-age','calc-bf','target-cal','target-carb-pct','target-prot-pct','target-fat-pct', 'target-fiber'].forEach(f => inp[f] = document.getElementById(f).value); const his = []; document.querySelectorAll('#history-table tbody tr').forEach(r => { const ro = []; r.querySelectorAll('td.measure-cell').forEach(c => ro.push(c.innerText)); his.push(ro); }); const da = { id: currentPatientId, lastModified: Date.now(), theme: currentTheme, inputs: inp, history: his, meals: dietMeals, customGoals: customGoals, physicalActivities: physicalActivities, activityGoalText: activityGoalText, goalsText: document.getElementById('goals-area').innerText, selects: { 'calc-formula': document.getElementById('calc-formula').value, 'calc-activity': document.getElementById('calc-activity').value, 'calc-sex': document.querySelector('input[name="calc-sex"]:checked').value }, images: { mainLogo: document.getElementById('logo-img-main').src.includes('data:') ? document.getElementById('logo-img-main').src : null, footerLogo: document.getElementById('logo-img-footer').src.includes('data:') ? document.getElementById('logo-img-footer').src : null } }; localStorage.setItem('diet_data_' + currentPatientId, JSON.stringify(da)); let l = getPatientsList(); const ix = l.findIndex(p => p.id === currentPatientId); const m = { id: currentPatientId, name: inp['patient-name'] || "Sem Nome", lastModified: Date.now() }; if (ix >= 0) l[ix] = m; else l.push(m); savePatientsList(l); const lb = document.getElementById('current-patient-label'); if(lb) lb.innerText = inp['patient-name'] || "Pacientes"; }
         function toggleBodyFatInput() { const f = document.getElementById('calc-formula').value; if(f==='tinsley_katch'||f==='cunningham') document.getElementById('bf-container').classList.remove('hidden'); else document.getElementById('bf-container').classList.add('hidden'); }
         function calculateEnergy() { const w = parseFloat(document.getElementById('calc-weight').value)||0, h = parseFloat(document.getElementById('calc-height').value)||0, a = parseFloat(document.getElementById('calc-age').value)||0, bf = parseFloat(document.getElementById('calc-bf').value)||0, act = parseFloat(document.getElementById('calc-activity').value)||1.2, s = document.querySelector('input[name="calc-sex"]:checked').value, f = document.getElementById('calc-formula').value; if(w>0 && h>0) document.getElementById('res-bmi').innerText = (w/((h/100)*(h/100))).toFixed(1); else document.getElementById('res-bmi').innerText = '--'; let b = 0; if(w>0) { if(f==='mifflin' && h>0 && a>0) b = (10*w) + (6.25*h) - (5*a) + (s==='m'?5:-161); else if(f==='harris' && h>0 && a>0) b = s==='m' ? 88.362+(13.397*w)+(4.799*h)-(5.677*a) : 447.593+(9.247*w)+(3.098*h)-(4.330*a); else if(f==='tinsley_ph' && h>0) b = (9.65*w) + (573*(h/100)) - (s==='m'?5.08:4.92); else if((f==='tinsley_katch'||f==='cunningham') && bf>0) { const mlg = w*(1-(bf/100)); b = f==='cunningham' ? 500+(22*mlg) : 370+(21.6*mlg); } } if(b>0) { document.getElementById('res-bmr').innerText = b.toFixed(0)+' kcal'; document.getElementById('res-tdee').innerText = (b*act).toFixed(0)+' kcal'; } else { document.getElementById('res-bmr').innerText = '--'; document.getElementById('res-tdee').innerText = '--'; } }
         function addNewMeal() { const n = document.getElementById('new-meal-name').value.trim(); if(!n) return showToast("Nome vazio","error"); dietMeals.push({ id: Date.now(), title: n, foods: [], observation: "" }); document.getElementById('new-meal-name').value=''; renderMealSelect(); renderDiet(); showToast("Criada!"); }
@@ -1518,3 +1456,4 @@
     </script>
 </body>
 </html>
+
