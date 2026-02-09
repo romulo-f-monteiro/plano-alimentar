@@ -996,7 +996,12 @@
             const compressed = LZString.compressToEncodedURIComponent(jsonStr);
             const patientName = document.getElementById('patient-name').value.trim();
             const safeName = encodeURIComponent(patientName).replace(/%20/g, '+');
-            const url = window.location.href.split('?')[0] + '?nome=' + safeName + '&d=' + compressed;
+            // --- MUDANÇA PARA O CARD FUNCIONAR ---
+// Aqui nós forçamos o link a apontar para o arquivo "ver.html"
+const baseUrl = "https://romulo-f-monteiro.github.io/dietas-personalizas_teste/ver.html";
+
+const url = baseUrl + '?nome=' + safeName + '&d=' + compressed;
+// -------------------------------------;
 
             navigator.clipboard.writeText(url).then(() => { showToast("Link copiado!", "success"); closeShareModal(); }).catch(err => prompt("Copie:", url));
         }
@@ -1456,4 +1461,3 @@
     </script>
 </body>
 </html>
-
