@@ -74,7 +74,7 @@
             
             .meal-table-row {
                 display: grid;
-                grid-template-columns: 1fr auto auto;
+                grid-template-columns: 1fr auto;
                 gap: 8px;
                 padding: 10px;
                 border-bottom: 1px solid #f1f5f9;
@@ -252,7 +252,9 @@
         @media (min-width: 1024px) {
             body.view-mode .col-name {
                 padding-left: 2rem !important; 
-                width: auto !important; 
+                width: 100% !important; /* Força os alimentos a ocuparem mais linhas */
+                white-space: normal !important;
+                word-wrap: break-word !important;
             }
             body.view-mode .meal-header {
                 padding-left: 1.5rem !important;
@@ -260,18 +262,20 @@
             
             body.view-mode table { table-layout: auto !important; }
             
-            /* Aproximação de Gramatura no Modo Link */
+            /* Aproximação de Gramatura no Modo Link e Textos em Preto */
             body.view-mode .col-qty {
                 width: 1px !important;
                 white-space: nowrap !important;
                 text-align: right !important;
                 padding-right: 2px !important;
+                color: black !important;
             }
             body.view-mode .col-unit {
                 width: 1px !important;
                 text-align: left !important;
                 padding-left: 2px !important;
                 padding-right: 20px !important;
+                color: black !important;
             }
             
             body.view-mode .col-cal {
@@ -280,6 +284,7 @@
                 text-align: left !important;
                 padding-left: 4px !important;
                 padding-right: 24px !important; 
+                color: black !important;
             }
         }
         
@@ -303,7 +308,7 @@
             background: transparent !important;
             appearance: none;
         }
-        body.view-mode .qty-input { font-weight: bold; border-bottom: none; width: auto; max-width: 50px; text-align: right; }
+        body.view-mode .qty-input { font-weight: bold; border-bottom: none; width: auto; max-width: 50px; text-align: right; color: black !important; }
         body.view-mode .measure-cell { border-color: #e2e8f0; }
         body.view-mode .col-actions { display: none !important; }
         body.view-mode .theme-ring { box-shadow: none !important; }
@@ -403,7 +408,7 @@
     <!-- Header Principal -->
     <header class="theme-bg text-white shadow-lg no-print transition-colors duration-300">
         <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3 w-full md:w-auto">
+            <div class="hidden md:flex items-center gap-3 w-full md:w-auto">
                 <div class="flex items-center justify-center w-12 h-12 bg-white/20 rounded-lg border-2 border-white/30 backdrop-blur-sm">
                     <span id="header-initials" class="text-xl font-black tracking-tighter">RFM</span>
                 </div>
@@ -412,7 +417,7 @@
                     <p class="text-xs opacity-90">Dietas Personalizadas</p>
                 </div>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-2 flex-wrap justify-center md:justify-end">
                 <button onclick="openTutorialModal()" class="nutritionist-only bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2 border border-purple-400">
                     <i class="fa-solid fa-circle-question"></i> Como usar
                 </button>
@@ -425,7 +430,7 @@
                 <button onclick="openShareModal()" class="nutritionist-only bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2 border border-blue-400">
                     <i class="fa-solid fa-share-nodes"></i> Compartilhar Link
                 </button>
-                <button onclick="printDiet()" class="bg-white text-slate-700 hover:bg-slate-100 px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm flex items-center gap-2">
+                <button onclick="printDiet()" class="hidden md:flex bg-white text-slate-700 hover:bg-slate-100 px-4 py-2 rounded-lg font-semibold text-sm transition shadow-sm items-center gap-2">
                     <i class="fa-solid fa-print text-slate-600"></i> Imprimir PDF
                 </button>
             </div>
@@ -735,6 +740,13 @@
                 <div class="text-center mt-10 pb-4 border-t border-slate-100 pt-4 break-inside-avoid">
                     <p class="text-[10px] text-slate-500 italic mb-1">Alimentos da tabela UNICAMP. Tabela Brasileira de Composição de Alimentos – TACO (4ª Edição)</p>
                     <p class="text-[10px] text-slate-400 font-medium">Criado por Rômulo F. Monteiro <span class="text-blue-400">@romulof.monteiro</span></p>
+                </div>
+
+                <!-- Botão de Imprimir Dieta (Apenas Mobile) -->
+                <div class="md:hidden mt-4 mb-6 flex justify-center no-print">
+                    <button onclick="printDiet()" class="w-full bg-white text-slate-700 hover:bg-slate-100 px-4 py-3 rounded-xl font-bold transition shadow-md border border-slate-200 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-print text-slate-600"></i> Imprimir dieta
+                    </button>
                 </div>
             </div>
         </main>
@@ -1288,9 +1300,11 @@ const url = baseUrl + '?nome=' + safeName + '&d=' + compressed;
                         g.forEach(f => {
                             const i = m.foods.indexOf(f);
                             html+=`<div class="meal-table-row">
-                                <div class="font-medium text-sm leading-tight" contenteditable="true" onblur="updateFoodName(${m.id},${i},this.innerText)">${f.name}</div>
-                                <div class="text-sm font-bold whitespace-nowrap inline-flex items-center bg-slate-50 rounded px-2 w-fit"><input type="number" class="qty-input w-10 bg-transparent text-right" value="${f.qty}" onchange="updateFoodQty(${m.id},${i},this.value)"> <span class="ml-1">g</span></div>
-                                <div class="text-xs font-bold text-slate-500 whitespace-nowrap">${f.totalCal.toFixed(0)} kcal</div>
+                                <div class="font-medium text-sm leading-tight" style="white-space: normal; word-wrap: break-word;" contenteditable="true" onblur="updateFoodName(${m.id},${i},this.innerText)">${f.name}</div>
+                                <div class="flex flex-col items-end gap-1">
+                                    <div class="text-sm font-bold text-black whitespace-nowrap inline-flex items-center justify-end w-fit"><input type="number" class="qty-input w-10 bg-transparent text-right text-black font-bold" value="${f.qty}" onchange="updateFoodQty(${m.id},${i},this.value)"> <span class="ml-1 text-black">g</span></div>
+                                    <div class="text-xs font-bold text-black whitespace-nowrap text-right">${f.totalCal.toFixed(0)} kcal</div>
+                                </div>
                                 <div class="meal-table-macros hide-macros">
                                     <span class="text-blue-600">C:${f.totalCarb.toFixed(0)}</span>
                                     <span class="text-emerald-600">P:${f.totalProt.toFixed(0)}</span>
@@ -1329,7 +1343,7 @@ const url = baseUrl + '?nome=' + safeName + '&d=' + compressed;
                             <span class="text-blue-600">C: ${mc.c.toFixed(0)}g</span>
                             <span class="text-emerald-600">P: ${mc.p.toFixed(0)}g</span>
                             <span class="text-yellow-600">G: ${mc.f.toFixed(0)}g</span>
-                            <span class="text-orange-600">F: ${mc.fib.toFixed(1)}g</span>
+                            <span class="text-orange-600 hidden md:inline">F: ${mc.fib.toFixed(1)}g</span>
                         </div>
                         <div class="px-4 pb-4 pt-2 border-t border-slate-100 relative group/obs"><div class="flex justify-between items-center mb-1"><span class="text-[10px] font-bold text-slate-400 uppercase">Observações</span><button onclick="clearMealObservation(${m.id})" class="no-print opacity-0 group-hover/obs:opacity-100 text-slate-300 hover:text-red-500 nutritionist-only"><i class="fa-solid fa-xmark"></i></button></div><div class="w-full p-2 bg-slate-50 border border-slate-200 rounded text-sm text-slate-600 outline-none" contenteditable="true" onblur="updateMealObservation(${m.id},this.innerText)">${m.observation||''}</div></div>
                         <!-- LINK DE RECEITAS ADICIONADO AQUI -->
@@ -1371,7 +1385,7 @@ const url = baseUrl + '?nome=' + safeName + '&d=' + compressed;
         function renderActivities() {
             const list = document.getElementById('activity-list'); list.innerHTML = '';
             physicalActivities.forEach((act, idx) => {
-                const html = `<div class="flex flex-col gap-2 p-4 bg-slate-50 border border-slate-100 rounded-lg group hover:border-slate-200 transition"><div class="flex gap-2 items-center"><div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0"><i class="fa-solid fa-person-running"></i></div><div class="flex-1 w-full"><input type="text" class="font-bold text-slate-700 bg-transparent w-full outline-none placeholder-slate-400 text-sm" value="${act.name}" placeholder="Nome da Atividade" onblur="updateActivityName(${idx}, this.value)"></div><button onclick="deleteActivity(${idx})" class="nutritionist-only text-slate-300 hover:text-red-500 px-2 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash-can"></i></button></div><div class="ml-10"><div class="text-sm text-slate-500 bg-transparent w-full outline-none mb-2 whitespace-pre-wrap break-words cursor-text" contenteditable="true" placeholder="Descreva a prática atual (ex: 3x semana, 30min)..." onblur="updateActivityDesc(${idx}, this.innerText)">${act.desc}</div><div class="flex items-start gap-2 mt-2 pt-2 border-t border-slate-100"><span class="text-xs font-bold text-emerald-600 uppercase w-24 shrink-0 mt-0.5">Recomendação:</span><div class="text-sm font-medium text-slate-700 bg-transparent w-full outline-none whitespace-pre-wrap break-words cursor-text" contenteditable="true" placeholder="Digite a meta recomendada..." onblur="updateActivityRec(${idx}, this.innerText)">${act.rec || ''}</div></div></div></div>`;
+                const html = `<div class="flex flex-col gap-2 p-4 bg-slate-50 border border-slate-100 rounded-lg group hover:border-slate-200 transition"><div class="flex gap-2 items-center"><div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center shrink-0"><i class="fa-solid fa-person-running"></i></div><div class="flex-1 w-full"><input type="text" class="font-bold text-slate-700 bg-transparent w-full outline-none placeholder-slate-400 text-sm" value="${act.name}" placeholder="Nome da Atividade" onblur="updateActivityName(${idx}, this.value)"></div><button onclick="deleteActivity(${idx})" class="nutritionist-only text-slate-300 hover:text-red-500 px-2 opacity-0 group-hover:opacity-100 transition"><i class="fa-solid fa-trash-can"></i></button></div><div class="ml-10"><div class="text-sm text-slate-500 bg-transparent w-full outline-none mb-2 whitespace-pre-wrap break-words cursor-text" contenteditable="true" placeholder="Descreva a prática atual (ex: 3x semana, 30min)..." onblur="updateActivityDesc(${idx}, this.innerText)">${act.desc}</div><div class="flex flex-col gap-1 mt-2 pt-2 border-t border-slate-100"><span class="text-xs font-bold text-emerald-600 uppercase">Recomendação:</span><div class="text-sm font-medium text-slate-700 bg-transparent w-full outline-none whitespace-pre-wrap break-words cursor-text" contenteditable="true" placeholder="Digite a meta recomendada..." onblur="updateActivityRec(${idx}, this.innerText)">${act.rec || ''}</div></div></div></div>`;
                 list.innerHTML += html;
             });
         }
@@ -1461,3 +1475,4 @@ const url = baseUrl + '?nome=' + safeName + '&d=' + compressed;
     </script>
 </body>
 </html>
+
